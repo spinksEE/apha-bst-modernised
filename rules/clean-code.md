@@ -1,8 +1,3 @@
----
-description: Comprehensive guide to Robert C. Martin's Clean Code principles for writing maintainable, readable code that expresses intent clearly
-globs:
-alwaysApply: false
----
 # Clean Code Principles
 
 A comprehensive guide to writing clean, maintainable, and readable code based on Robert C. Martin's "Clean Code" principles. These rules focus on creating code that clearly expresses intent, is easy to understand, modify, and maintain over time.
