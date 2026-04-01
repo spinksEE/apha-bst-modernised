@@ -1,6 +1,6 @@
 # Vite Configuration Rules
 
-Build tool governance for the NAM Conference Survey application ensuring fast development, optimized production builds, and consistent environment configuration using Vite 5.
+Build tool governance for the APHA BST application ensuring fast development, optimized production builds, and consistent environment configuration using Vite 5.
 
 ## Context
 
