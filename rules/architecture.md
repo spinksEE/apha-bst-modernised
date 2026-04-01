@@ -4,19 +4,6 @@
 **Last Updated**: 2026-04-01
 **Tech Stack**: React + NestJS + Prisma + PostgreSQL + Docker
 **Auth**: Static credential login + JWT (POC)
----
-
-## Table of Contents
-
-1. [System Overview](#system-overview)
-2. [Architecture Diagram](#architecture-diagram)
-3. [Technology Stack](#technology-stack)
-4. [Application Structure](#application-structure)
-5. [Authentication & Authorisation](#authentication--authorisation)
-6. [API Design](#api-design)
-7. [Database Design](#database-design)
-8. [Security](#security)
-9. [Key Decisions & Rationale](#key-decisions--rationale)
 
 ---
 
