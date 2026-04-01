@@ -56,7 +56,6 @@ pnpm run prisma:studio        # visual editor at localhost:5555
 - rules/domain-driven-design.md
 - rules/vite.md
 - rules/clean-code.md
-- rules/docker-setup.md
 
 ## Ports
 
@@ -71,5 +70,10 @@ pnpm run prisma:studio        # visual editor at localhost:5555
 - All commands run inside Docker — don't run `pnpm test` on the host
 - Postgres must pass its health check before the backend starts (handled by `depends_on`)
 - Hot reload sometimes stalls — `docker-compose up --build` to fix
+- Hot reload not working in Docker → add `usePolling: true` to Vite `server.watch` config
 - Migrations auto-apply on container start via `prisma migrate deploy`
 - `docker-compose down -v` deletes all data — use `pnpm run stop` to preserve it
+- Port already in use → `lsof -i :<port>` to identify the process
+- Database migrations failed → `prisma migrate reset` or `prisma migrate resolve --applied <name>`
+- Environment variables not loaded → restart containers after `.env` changes
+- Permission denied on node_modules → remove host `node_modules` dirs, rebuild containers
