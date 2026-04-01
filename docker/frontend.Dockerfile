@@ -10,7 +10,7 @@ RUN apk add --no-cache curl
 WORKDIR /workspace
 
 # Copy workspace root files first (layer caching)
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
 
 # Copy all referenced workspace member package.json files
 # pnpm install --frozen-lockfile fails if any workspace member is missing

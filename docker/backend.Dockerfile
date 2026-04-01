@@ -5,12 +5,12 @@
 FROM node:20-alpine AS base
 
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl openssl
 
 WORKDIR /workspace
 
 # Copy workspace root files first (layer caching)
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
 
 # Copy all referenced workspace member package.json files
 # pnpm install --frozen-lockfile fails if any workspace member is missing
