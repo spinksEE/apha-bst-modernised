@@ -65,6 +65,11 @@ pnpm run prisma:studio        # visual editor at localhost:5555
 | Backend    | 3001 |
 | PostgreSQL | 5432 |
 
+## Git workflow
+
+- Use the `/commit` skill for all commits — the user prefers fine-grained, incremental commits over large batched ones
+- If the `/commit` skill is unavailable, fall back to fine-grained conventional commit messages (e.g. `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`)
+
 ## Gotchas
 
 - All commands run inside Docker — don't run `pnpm test` on the host
