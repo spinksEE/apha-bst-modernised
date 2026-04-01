@@ -739,39 +739,6 @@ docker-compose exec postgres pg_isready -U postgres
 
 ---
 
-## Production Deployment (Future)
-
-### Docker Compose Production
-
-**File**: `docker-compose.prod.yml`
-
-```yaml
-version: '3.8'
-
-services:
-  postgres:
-    # Same as development, but with stronger password
-
-  backend:
-    build:
-      target: production  # Use production stage
-    environment:
-      NODE_ENV: production
-
-  frontend:
-    build:
-      target: production  # Nginx serving static files
-    ports:
-      - "80:80"
-```
-
-**Run**:
-```bash
-docker-compose -f docker-compose.prod.yml up -d
-```
-
----
-
 ## Security Considerations
 
 ### Development
@@ -783,38 +750,6 @@ docker-compose -f docker-compose.prod.yml up -d
 - [ ] HTTPS with reverse proxy (Nginx, Traefik)
 - [ ] Network isolation (remove exposed PostgreSQL port)
 - [ ] Automated backups
-
----
-
-## Performance Optimisation
-
-### Development
-- **Node modules cache**: Anonymous volumes speed up builds
-- **Multi-stage builds**: Faster rebuilds (only changed layers)
-- **Hot reload**: No rebuild needed during development
-
-### Production (Future)
-- **Smaller images**: Alpine base (~50MB vs 1GB)
-- **Multi-stage builds**: Only production dependencies in final image
-- **Nginx caching**: Static asset caching headers
-- **Connection pooling**: Prisma connection pool configuration
-
----
-
-## Monitoring (Future)
-
-### Container Stats
-
-```bash
-# Real-time stats
-docker stats
-
-# Specific containers
-docker stats apha-bst-backend apha-bst-frontend
-```
-
-### Logs Aggregation (Future)
-- Integrate with ELK stack (Elasticsearch, Logstash, Kibana)
 
 ---
 
