@@ -4,3 +4,13 @@ PROMPT_plan.md
 PROMPT_build.md
 .claude/
 .ralph/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+
+# Environment
+.env
