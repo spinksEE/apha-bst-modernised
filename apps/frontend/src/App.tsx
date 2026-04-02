@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/guards/ProtectedRoute';
+import { AppShell } from './components/layout/AppShell';
 import { HealthPage } from './pages/HealthPage';
 import { LoginPage } from './pages/LoginPage';
 
-// Placeholder pages — replaced in Phase 6
+// Placeholder pages — replaced in later phases
 function HomePlaceholder(): React.JSX.Element {
   return <div data-testid="home-page">Home</div>;
 }
@@ -22,13 +23,14 @@ export function App(): React.JSX.Element {
           <Route path="/access-denied" element={<AccessDeniedPlaceholder />} />
           <Route path="/health" element={<HealthPage />} />
           <Route
-            path="/"
             element={
               <ProtectedRoute>
-                <HomePlaceholder />
+                <AppShell />
               </ProtectedRoute>
             }
-          />
+          >
+            <Route path="/" element={<HomePlaceholder />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </ErrorBoundary>
