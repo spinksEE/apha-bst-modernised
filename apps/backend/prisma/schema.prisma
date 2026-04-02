@@ -13,3 +13,59 @@ model HealthCheck {
   status    String
   checkedAt DateTime @default(now())
 }
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Auth & RBAC models (FT-001)
+// ──────────────────────────────────────────────────────────────────────────────
+
+enum UserLevel {
+  Supervisor
+  DataEntry
+  ReadOnly
+}
+
+enum AuditEventType {
+  Login
+  Logout
+  LoginFailed
+  AccessDenied
+  ScreenAccess
+}
+
+model APHALocation {
+  id           Int     @id @default(autoincrement())
+  locationName String
+  isAHVLA      Boolean @default(false)
+  users        User[]
+}
+
+model User {
+  id                   Int                   @id @default(autoincrement())
+  userName             String                @unique
+  locationId           Int
+  userLevel            UserLevel
+  location             APHALocation          @relation(fields: [locationId], references: [id])
+  auditLogs            AuditLog[]
+  dataEntryPermissions DataEntryPermission[]
+}
+
+model AuditLog {
+  id        Int            @id @default(autoincrement())
+  userId    Int?
+  timestamp DateTime       @default(now())
+  eventType AuditEventType
+  details   String
+  ipAddress String
+  sessionId String?
+  user      User?          @relation(fields: [userId], references: [id])
+}
+
+model DataEntryPermission {
+  id         Int     @id @default(autoincrement())
+  screenName String
+  userId     Int
+  canWrite   Boolean
+  user       User    @relation(fields: [userId], references: [id])
+
+  @@unique([screenName, userId])
+}
