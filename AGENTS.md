@@ -26,8 +26,11 @@ docker-compose exec backend pnpm lint
 
 # Frontend
 docker-compose exec frontend pnpm test         # unit tests
-docker-compose exec frontend pnpm exec playwright test  # e2e
+docker-compose exec frontend pnpm exec playwright test  # acceptance tests
 docker-compose exec frontend pnpm type-check
+
+# Browser verification (from host, not Docker — see rules/acceptance-testing.md)
+dev-browser --headless                                   # AI agent visual check
 ```
 
 Database:
@@ -56,6 +59,7 @@ pnpm run prisma:studio        # visual editor at localhost:5555
 - rules/domain-driven-design.md
 - rules/vite.md
 - rules/clean-code.md
+- rules/acceptance-testing.md
 
 ## Ports
 
