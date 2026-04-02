@@ -1,0 +1,31 @@
+# Frontend Dockerfile — multi-stage build for Vite dev server
+# WORKDIR /workspace preserves monorepo structure for pnpm workspace resolution
+
+# ---------- base ----------
+FROM node:20-alpine AS base
+
+RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
+RUN apk add --no-cache curl
+
+WORKDIR /workspace
+
+# Copy workspace root files first (layer caching)
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml tsconfig.base.json ./
+
+# Copy all referenced workspace member package.json files
+# pnpm install --frozen-lockfile fails if any workspace member is missing
+COPY apps/frontend/package.json apps/frontend/package.json
+COPY packages/shared/package.json packages/shared/package.json
+
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY apps/frontend/ apps/frontend/
+COPY packages/shared/ packages/shared/
+
+EXPOSE 3000
+
+# ---------- development ----------
+FROM base AS development
+
+CMD ["pnpm", "--filter", "frontend", "run", "dev", "--", "--host"]
