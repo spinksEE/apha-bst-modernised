@@ -76,7 +76,7 @@ describe('AppShell', () => {
     renderAppShell();
 
     const footer = screen.getByTestId('app-footer');
-    expect(footer).toHaveTextContent('APHA BST System 2026');
+    expect(footer).toHaveTextContent('APHA BST System © 2026');
     expect(footer).toHaveTextContent('admin.supervisor');
     expect(footer).toHaveTextContent('Supervisor');
     expect(footer).toHaveTextContent('Preston Laboratory');

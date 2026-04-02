@@ -77,7 +77,7 @@ export function AppShell(): React.JSX.Element {
       <MantineAppShell.Footer data-testid="app-footer" p="xs">
         <Group justify="space-between" px="md">
           <Text size="xs" c="dimmed">
-            APHA BST System 2026
+            APHA BST System © 2026
           </Text>
           <Text size="xs" c="dimmed">
             User: {userDisplayName} | Role: {userRoleLabel} | Location: {userLocationName}

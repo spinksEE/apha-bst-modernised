@@ -114,7 +114,7 @@ export function LoginPage(): React.JSX.Element {
           </Card>
 
           <Text ta="center" size="sm" c="dimmed" mt="md">
-            APHA BST System 2026
+            APHA BST System © 2026
           </Text>
         </form>
       </Box>

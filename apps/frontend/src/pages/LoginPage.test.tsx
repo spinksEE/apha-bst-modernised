@@ -53,7 +53,7 @@ describe('LoginPage', () => {
     expect(screen.getByTestId('password-input')).toBeInTheDocument();
     expect(screen.getByTestId('login-submit')).toBeInTheDocument();
     expect(screen.getByText('Brainstem Training System')).toBeInTheDocument();
-    expect(screen.getByText('APHA BST System 2026')).toBeInTheDocument();
+    expect(screen.getByText('APHA BST System © 2026')).toBeInTheDocument();
   });
 
   it('shows error on failed login (401)', async () => {
