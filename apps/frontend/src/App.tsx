@@ -3,13 +3,10 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/guards/ProtectedRoute';
 import { AppShell } from './components/layout/AppShell';
 import { HealthPage } from './pages/HealthPage';
+import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 
 // Placeholder pages — replaced in later phases
-function HomePlaceholder(): React.JSX.Element {
-  return <div data-testid="home-page">Home</div>;
-}
-
 function AccessDeniedPlaceholder(): React.JSX.Element {
   return <div data-testid="access-denied-page">Access Denied</div>;
 }
@@ -29,7 +26,7 @@ export function App(): React.JSX.Element {
               </ProtectedRoute>
             }
           >
-            <Route path="/" element={<HomePlaceholder />} />
+            <Route path="/" element={<HomePage />} />
           </Route>
         </Routes>
       </BrowserRouter>
