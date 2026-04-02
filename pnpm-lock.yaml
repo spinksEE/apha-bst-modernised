@@ -10,6 +10,9 @@ importers:
 
   apps/backend:
     dependencies:
+      '@apha-bst/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@nestjs/common':
         specifier: ^10.4.15
         version: 10.4.22(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -62,6 +65,9 @@ importers:
 
   apps/frontend:
     dependencies:
+      '@apha-bst/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@tanstack/react-query':
         specifier: ^5.62.0
         version: 5.96.1(react@18.3.1)

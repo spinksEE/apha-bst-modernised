@@ -63,7 +63,7 @@ No External Services Required:
   "language": "TypeScript (strict mode)",
   "ui-library": "Mantine UI v7",
   "routing": "React Router v6",
-  "forms": "React Hook Form + Zod",
+  "forms": "@mantine/form + Zod",
   "state": "TanStack Query (server) + Zustand (client)",
   "http": "Axios",
   "build": "Vite 5"

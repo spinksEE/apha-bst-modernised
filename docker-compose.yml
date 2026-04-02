@@ -35,8 +35,19 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-apha_bst}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_EXPIRY: ${JWT_EXPIRY:-8h}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin}
+      FRONTEND_URL: http://localhost:3000
     ports:
       - "3001:3001"
+    volumes:
+      - ./apps/backend/src:/workspace/apps/backend/src
+      - ./apps/backend/prisma:/workspace/apps/backend/prisma
+      - ./packages/shared/src:/workspace/packages/shared/src
+      - /workspace/apps/backend/node_modules
+      - /workspace/node_modules
+    command: ["sh", "-c", "pnpm --filter backend exec prisma migrate deploy && pnpm --filter backend exec prisma db seed && pnpm --filter backend run start:dev"]
     depends_on:
       postgres:
         condition: service_healthy
@@ -64,6 +75,11 @@ services:
       VITE_API_URL: http://backend:3001
     ports:
       - "3000:3000"
+    volumes:
+      - ./apps/frontend/src:/workspace/apps/frontend/src
+      - ./packages/shared/src:/workspace/packages/shared/src
+      - /workspace/apps/frontend/node_modules
+      - /workspace/node_modules
     depends_on:
       backend:
         condition: service_healthy
