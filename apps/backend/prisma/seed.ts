@@ -10,6 +10,7 @@ const users = [
     role: UserRole.Supervisor,
     locationCode: 'APHA-HQ',
     password: 'Password123',
+    isActive: true,
   },
   {
     userName: 'dataentry',
@@ -17,6 +18,7 @@ const users = [
     role: UserRole.DataEntry,
     locationCode: 'APHA-NE',
     password: 'Password123',
+    isActive: true,
   },
   {
     userName: 'readonly',
@@ -24,6 +26,7 @@ const users = [
     role: UserRole.ReadOnly,
     locationCode: 'APHA-SW',
     password: 'Password123',
+    isActive: true,
   },
   {
     userName: 'sysadmin',
@@ -31,6 +34,15 @@ const users = [
     role: UserRole.SystemAdministrator,
     locationCode: 'APHA-HQ',
     password: 'Password123',
+    isActive: true,
+  },
+  {
+    userName: 'inactive',
+    name: 'Inactive User',
+    role: UserRole.DataEntry,
+    locationCode: 'APHA-NE',
+    password: 'Password123',
+    isActive: false,
   },
 ];
 
@@ -69,7 +81,7 @@ async function seed(): Promise<void> {
       update: {
         name: user.name,
         role: user.role,
-        isActive: true,
+        isActive: user.isActive,
         locationId: location.id,
         passwordHash,
       },
@@ -77,7 +89,7 @@ async function seed(): Promise<void> {
         userName: user.userName,
         name: user.name,
         role: user.role,
-        isActive: true,
+        isActive: user.isActive,
         locationId: location.id,
         passwordHash,
       },

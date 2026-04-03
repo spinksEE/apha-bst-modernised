@@ -5,7 +5,15 @@
 FROM node:20-alpine AS base
 
 RUN corepack enable && corepack prepare pnpm@9.15.4 --activate
-RUN apk add --no-cache curl
+RUN apk add --no-cache curl chromium
+
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+RUN if [ ! -f /usr/bin/chromium-browser ] && [ -f /usr/bin/chromium ]; then \
+      ln -s /usr/bin/chromium /usr/bin/chromium-browser; \
+    elif [ ! -f /usr/bin/chromium ] && [ -f /usr/bin/chromium-browser ]; then \
+      ln -s /usr/bin/chromium-browser /usr/bin/chromium; \
+    fi
 
 WORKDIR /workspace
 

@@ -65,6 +65,7 @@ services:
     environment:
       NODE_ENV: development
       VITE_API_URL: http://backend:3001
+      PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH: /usr/bin/chromium-browser
     ports:
       - "3000:3000"
     depends_on:
