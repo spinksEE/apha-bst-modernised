@@ -12,7 +12,6 @@
 | **Priority**            | Must                                                                                                                           |
 | **Last Updated**        | 2026-03-31                                                                                                                     |
 | **PRD Reference**       | Section 10 — Roles & Permissions; System Administration bounded context (authentication)  |
-| **Open Questions**      | 4                                                                                                                              |
 
 ---
 
@@ -819,16 +818,7 @@ No search functionality is implemented within the authentication and navigation 
 | ---------------- | -------------- | ------------------------------------------ |
 | **Human Effort** | 15 person-days | Assumes straightforward database integration, standard web development patterns, and minimal custom security components required (POC uses naive login) |
 
-## 18. Open Questions
-
-| # | Question | Context | Impact | Raised By | Status |
-|---|----------|---------|--------|-----------|--------|
-| 1 | Should news/announcements functionality be included? | Currently scoped as system announcements on home page | Interface complexity and maintenance overhead | Agent | Open |
-| 2 | What are the specific screen-level permission values in tblDataEntry table and how do they map to user interface behaviour? | BR-004 references CanWrite values but PRD doesn't specify the complete permission model | Cannot fully define Data Entry user interface restrictions | Agent | Open |
-| 3 | What is the desired session timeout duration and warning period for idle users? | No timeout controls creates security risk | Security policy compliance and user experience balance | Agent | Open |
-| 4 | Are there specific corporate branding or visual design standards that must be applied to authentication and navigation interfaces? | PRD content focuses on functional requirements without visual design guidance | User interface consistency and corporate compliance | Agent | Open |
-
-## 19. Definition of Done
+## 18. Definition of Done
 
 This feature is considered done when all of the following are satisfied:
 
@@ -839,11 +829,10 @@ This feature is considered done when all of the following are satisfied:
 - [ ] All data model requirements in Data Model and Requirements are implemented
 - [ ] All integration points in Integration Points and External Dependencies are connected and functional
 - [ ] All non-functional requirements in Non-Functional Requirements meet their acceptance thresholds
-- [ ] No open questions in Open Questions remain with status "Open" that block release
 - [ ] Feature has been reviewed and accepted by the product owner
 - [ ] Feature has been demonstrated to stakeholders
 
-## 20. Glossary
+## 19. Glossary
 
 | Term | Definition |
 |------|-----------|
