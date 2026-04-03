@@ -781,32 +781,21 @@ No search functionality is implemented within the authentication and navigation 
 | NFR-007 | Compliance | Audit trail retention | Authentication and access logs retained for minimum 7 years |
 | NFR-008 | Security | Unauthorised access response | Access denials processed and logged within 2 seconds |
 
-## 13. Legacy Pain Points and Proposed Improvements
-
-| # | Legacy Pain Point | Impact | Proposed Improvement | Rationale |
-|---|------------------|--------|---------------------|-----------|
-| 1 | News system functionality present but completely unused and considered redundant | System maintenance overhead and unnecessary complexity | Remove news functionality entirely from new system | Eliminates unused code and simplifies interface |
-| 2 | Some navigation elements (back to home buttons) do not function properly | User frustration and navigation confusion | Implement consistent navigation patterns with working breadcrumbs and return buttons | Improves user experience and reduces support calls |
-| 3 | Database passwords stored in plain text configuration files | Security vulnerability exposing credentials | Use encrypted connection strings and environment-based configuration | Eliminates credential exposure risk |
-| 4 | No session timeout controls implemented for idle users | Security risk from unattended sessions | Implement configurable session timeout with warning notifications | Reduces security risk while maintaining usability |
-| 5 | Error notifications contain sensitive system information | Information disclosure in error reports | Sanitise error information in logs and user-facing messages | Protects system information while maintaining monitoring capability |
-| 6 | No row-level security implemented, relying entirely on application-layer access control | Potential for data access bypass | Maintain application-layer security with additional database-level validation | Provides defence-in-depth security approach |
-
-## 14. Internal System Dependencies
+## 13. Internal System Dependencies
 
 | Dependency | Type | Description | Impact if Unavailable |
 |------------|------|-------------|----------------------|
 | SQL Server Database | Blocks | User credential validation, permission validation, audit logging, and session data storage | Complete system failure - no user access possible |
 | Session State Management | Enhances | User context tracking across requests | Degraded experience - user context may be lost between screens |
 
-## 15. Business Dependencies
+## 14. Business Dependencies
 
 | Dependency                                                        | Owner                        | Description              | Status                             |
 | ----------------------------------------------------------------- | ---------------------------- | ------------------------ | ---------------------------------- |
 | Database user credentials and permissions setup | Database Administrator | User credential and permission records must be configured in BST database User and DataEntry tables | Pending |
 | Help content creation | Business Analyst | System help documentation must be written and reviewed | Pending |
 
-## 16. Key Assumptions
+## 15. Key Assumptions
 
 | # | Assumption | Risk if Invalid |
 |---|-----------|-----------------|
@@ -815,7 +804,7 @@ No search functionality is implemented within the authentication and navigation 
 | 4 | Business requirements for role-based access remain consistent with legacy system | Would require redesign of permission model and user interface |
 | 5 | Help content can be maintained by business users rather than technical staff | Would require ongoing technical resources for help system updates |
 
-## 17. Success Metrics and KPIs
+## 16. Success Metrics and KPIs
 
 | Metric                                        | Baseline (Legacy)                      | Target (New System)           | Measurement Method          |
 | --------------------------------------------- | -------------------------------------- | ----------------------------- | --------------------------- |
@@ -826,13 +815,13 @@ No search functionality is implemented within the authentication and navigation 
 | Authentication-related support calls | Unknown baseline | Reduce through simple login flow | Support ticket analysis |
 | Security incident response time | Manual notification only | Unauthorised access logged in audit trail | Audit log review |
 
-## 18. Effort Estimate
+## 17. Effort Estimate
 
 | Dimension        | Estimate       | Assumptions                                |
 | ---------------- | -------------- | ------------------------------------------ |
 | **Human Effort** | 15 person-days | Assumes straightforward database integration, standard web development patterns, and minimal custom security components required (POC uses naive login) |
 
-## 19. Open Questions
+## 18. Open Questions
 
 | # | Question | Context | Impact | Raised By | Status |
 |---|----------|---------|--------|-----------|--------|
@@ -841,7 +830,7 @@ No search functionality is implemented within the authentication and navigation 
 | 3 | What is the desired session timeout duration and warning period for idle users? | Legacy system has no timeout controls which creates security risk | Security policy compliance and user experience balance | Agent | Open |
 | 4 | Are there specific corporate branding or visual design standards that must be applied to authentication and navigation interfaces? | PRD content focuses on functional requirements without visual design guidance | User interface consistency and corporate compliance | Agent | Open |
 
-## 20. Definition of Done
+## 19. Definition of Done
 
 This feature is considered done when all of the following are satisfied:
 
@@ -856,7 +845,7 @@ This feature is considered done when all of the following are satisfied:
 - [ ] Feature has been reviewed and accepted by the product owner
 - [ ] Feature has been demonstrated to stakeholders
 
-## 21. Glossary
+## 20. Glossary
 
 | Term | Definition |
 |------|-----------|
