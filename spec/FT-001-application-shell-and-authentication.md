@@ -6,7 +6,7 @@
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | **Feature ID**          | FT-001                                                                                                                         |
 | **Upstream Features**   | None                                                                                                                           |
-| **Downstream Features** | FT-002, FT-003, FT-004, FT-005, FT-006                                                                                        |
+| **Downstream Features** | FT-002, FT-003, FT-004, FT-005, FT-006                                                                                         |
 | **Feature Name**        | Application Shell & Authentication                                                                                             |
 | **Owner**               | System Administrator                                                                                                           |
 | **Priority**            | Must                                                                                                                           |
@@ -500,7 +500,7 @@ Scenario: Session lifecycle logging
 │  ║  You do not have permission to access the Brainstem        ║ │
 │  ║  Training System.                                          ║ │
 │  ║                                                            ║ │
-│  ║  Your access attempt has been logged.                       ║ │
+│  ║  Your access attempt has been logged.                      ║ │
 │  ║                                                            ║ │
 │  ║  If you believe you should have access to this system,     ║ │
 │  ║  please contact your system administrator.                 ║ │
