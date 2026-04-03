@@ -48,6 +48,162 @@ The GOV.UK Design System provides styles, components, and patterns to make gover
 - **RULE-203:** Consider the Task list component for multi-step processes to show progress across sections.
 - **RULE-204:** Use the Details component for progressive disclosure of supplementary information.
 
+## DEFRA Organisation Branding
+
+This is a DEFRA (Department for Environment, Food & Rural Affairs) service operated by APHA (Animal and Plant Health Agency). Apply these branding rules on top of the standard GOV.UK template:
+
+- **Organisation colour:** DEFRA green `#00a33b` (contrast-safe variant: `#008531`). Use via `govuk-organisation-colour("department-for-environment-food-rural-affairs")`. The contrast-safe variant meets WCAG AA for text on white backgrounds -- always prefer it for text and interactive elements.
+- **Header:** Use the standard GOV.UK Header component. Set the `organisationName` to display "Department for Environment, Food & Rural Affairs" or the service-specific name. Do NOT change the black header bar or crown logo -- these are mandatory GOV.UK elements.
+- **Service name:** Display the service name in the header using the `serviceName` prop/slot. For this service: "APHA BST".
+- **Crown copyright:** The footer MUST include "© Crown copyright" with a link to the National Archives, and the Open Government Licence notice. These are non-negotiable GOV.UK requirements.
+
+## Visual Identity Reference
+
+These are the canonical GOV.UK Design System colour tokens, typography, and spacing values. When building or theming components, use these exact values to ensure the service looks like a real GOV.UK site.
+
+### Colour Palette
+
+**Functional colours (use these by role, not by hex):**
+
+| Role | Hex | Sass function | Usage |
+|------|-----|---------------|-------|
+| Text | `#0b0c0c` | `govuk-functional-colour("text")` | All body text |
+| Secondary text | `#484949` | `govuk-functional-colour("secondary-text")` | Hint text, captions |
+| Link | `#1a65a6` | `govuk-functional-colour("link")` | Default link colour |
+| Link hover | `#0f385c` | — | Link hover state |
+| Link visited | `#54319f` | `govuk-functional-colour("link-visited")` | Visited link colour |
+| Link active | `#0b0c0c` | — | Link active/pressed state |
+| Focus | `#ffdd00` | `govuk-functional-colour("focus")` | Focus indicator background |
+| Focus text | `#0b0c0c` | `govuk-functional-colour("focus-text")` | Text on focus background |
+| Error | `#ca3535` | `govuk-functional-colour("error")` | Error messages and borders |
+| Success | `#0f7a52` | `govuk-functional-colour("success")` | Confirmation panels, success |
+| Brand | `#1d70b8` | `govuk-functional-colour("brand")` | GOV.UK brand blue |
+| Border | `#cecece` | `govuk-functional-colour("border")` | Standard borders |
+| Input border | `#0b0c0c` | `govuk-functional-colour("input-border")` | Form input borders (black) |
+| Body background | `#ffffff` | — | Page body background |
+| Page background | `#f4f8fb` | — | Template background (light blue-grey) |
+
+**Key colour rules:**
+- Never hardcode hex values -- always reference the Sass function or token name so values stay in sync with GOV.UK Frontend updates
+- Form input borders are black (`#0b0c0c`), not grey -- this is intentional for accessibility
+- The focus state is always yellow (`#ffdd00`) background with black text and a 3px black outline. Never change this -- it is a critical accessibility pattern across all GOV.UK services
+- Error red (`#ca3535`) is used for error messages, error borders on inputs, and the error summary component
+
+### Typography
+
+| Element | Class | Desktop size | Mobile size | Weight |
+|---------|-------|-------------|-------------|--------|
+| XL heading | `govuk-heading-xl` | 48px | 32px | Bold (700) |
+| L heading | `govuk-heading-l` | 36px | 24px | Bold (700) |
+| M heading | `govuk-heading-m` | 24px | 18px | Bold (700) |
+| S heading | `govuk-heading-s` | 19px | 16px | Bold (700) |
+| Body | `govuk-body` | 19px | 16px | Regular (400) |
+| Body small | `govuk-body-s` | 16px | 14px | Regular (400) |
+| Body large | `govuk-body-l` | 24px | 18px | Regular (400) |
+| Caption XL | `govuk-caption-xl` | 27px | 18px | Regular (400) |
+
+**Font stack:** `"GDS Transport", arial, sans-serif`
+
+**Typography rules:**
+- Use sentence case for all headings (e.g. "Check your answers" not "Check Your Answers")
+- Only one `<h1>` per page, using `govuk-heading-xl` or `govuk-heading-l`
+- Heading hierarchy must be sequential -- do not skip from `h1` to `h3`
+- Do not override font family, sizes, or weights -- use the GDS type scale classes only
+- Body text at 19px on desktop is larger than most sites -- this is intentional for readability. Do not reduce it
+
+### Spacing Scale
+
+Use `govuk-spacing(n)` for all margin and padding values. Never use arbitrary pixel values.
+
+| Scale point | Value | Common usage |
+|-------------|-------|-------------|
+| 0 | 0px | Reset spacing |
+| 1 | 5px | Tight internal spacing |
+| 2 | 10px | Small gaps, inline spacing |
+| 3 | 15px | Standard internal padding |
+| 4 | 15px/20px | Form group spacing |
+| 5 | 15px/25px | Section spacing (small) |
+| 6 | 20px/30px | Section spacing (medium) |
+| 7 | 25px/40px | Section spacing (large) |
+| 8 | 30px/50px | Major section breaks |
+| 9 | 40px/60px | Page-level spacing |
+
+Values shown as mobile/desktop where responsive. Use `govuk-responsive-margin` and `govuk-responsive-padding` mixins for responsive spacing.
+
+### Breakpoints
+
+| Name | Value | Usage |
+|------|-------|-------|
+| Mobile | 320px | Minimum supported width |
+| Tablet | 641px | Two-column layouts begin |
+| Desktop | 769px | Full desktop layout |
+
+### Focus States
+
+The GOV.UK focus state is a distinctive and critical accessibility pattern. Every interactive element must show it:
+
+- **Background:** `#ffdd00` (yellow)
+- **Outline:** 3px solid `#0b0c0c` (black)
+- **Text colour:** `#0b0c0c` (black, overriding link blue)
+- **Offset:** No outline offset (outline sits tight to the element)
+
+When theming or building custom interactive elements, replicate this exact focus state. Users of GOV.UK services expect this pattern -- it is tested with assistive technology users and must not be altered.
+
+### Key Visual Patterns
+
+**GOV.UK Header (black bar):**
+- Background: `#0b0c0c` (black)
+- Crown logo on the left, GOV.UK text beside it
+- Service name in white below the crown row
+- Full width, not constrained to 1020px content area
+
+**GOV.UK Footer (grey bar):**
+- Background: `#f3f2f1` (light grey)
+- Contains: Open Government Licence notice, Crown copyright link
+- Meta links (accessibility statement, cookies, etc.)
+- Full width with content constrained to 1020px
+
+**Green confirmation panel:**
+- Background: `#0f7a52` (success green)
+- White text, used for confirmation pages ("Application complete")
+- Use the Panel component -- do not build custom
+
+**Phase banner:**
+- "Alpha" or "Beta" tag in the banner area
+- Includes feedback link
+- Sits between the header and main content
+
+**Notification banner:**
+- Blue left border (`#1d70b8`) for informational
+- Blue header background for success variant
+
+## Content Design Rules
+
+GOV.UK services follow strict content conventions. Text that does not follow these rules will look wrong even if the visual styling is correct.
+
+### Writing Style
+
+- **Plain English:** Use simple, direct language. Avoid jargon, Latin, and formal phrasing. Write "use" not "utilise", "buy" not "purchase", "help" not "assist".
+- **Sentence case everywhere:** Headings, labels, buttons, links, and navigation items all use sentence case. The only exceptions are proper nouns and acronyms. Write "Check your answers" not "Check Your Answers".
+- **Active voice:** Write "We will send you an email" not "An email will be sent to you".
+- **Second person:** Address the user as "you". Write "Enter your email address" not "Enter the email address".
+- **Short sentences:** Aim for 25 words or fewer per sentence. Break long sentences into two.
+
+### Formatting Conventions
+
+- **Dates:** "6 April 2026" (no leading zero, month as word, no ordinals like "6th")
+- **Times:** "5:30pm" (no space before am/pm, no minutes for on-the-hour times: "5pm")
+- **Numbers:** Spell out one to nine, use digits for 10 and above. Use commas in thousands: "1,250"
+- **Currency:** "£75" (no decimal for whole pounds), "£75.50" (two decimal places when pence)
+- **Addresses:** Each line on a new line, postcode on the final line, no comma at line ends
+- **Phone numbers:** "0800 123 4567" (spaces after area code and in groups)
+
+### Button and Link Text
+
+- Buttons use a verb: "Continue", "Submit application", "Save and return". Never "Click here" or "Next".
+- Links describe the destination: "View your applications" not "Click here". Never use "Click here" or raw URLs as link text.
+- Destructive actions use the warning button style (red) with clear text: "Delete application".
+
 ## Patterns & Anti-Patterns
 
 ### Do This
@@ -100,6 +256,13 @@ The GOV.UK Design System provides styles, components, and patterns to make gover
 2. GDS standard components take precedence over custom designs
 3. User research evidence overrides personal design preferences
 
+*When making visual decisions without a GDS component:*
+1. Use only colours from the GOV.UK functional colour palette -- never invent colours
+2. Use the GDS spacing scale -- never use arbitrary pixel values
+3. Use the GDS type scale and font stack -- never override typography
+4. Replicate the standard focus state exactly on any custom interactive elements
+5. Follow the content design rules for all text (sentence case, plain English, GOV.UK date/number formats)
+
 *When facing edge cases:*
 - If no GDS component exists, check the GDS community backlog and GitHub discussions before building custom
 - If extending a GDS component, follow the official guidance on extending and modifying components
@@ -136,6 +299,8 @@ The GOV.UK Design System provides styles, components, and patterns to make gover
 - [GOV.UK Service Manual](https://www.gov.uk/service-manual) - Standards for building government services
 - [WCAG 2.2 Guidelines](https://www.w3.org/TR/WCAG22/) - Web Content Accessibility Guidelines
 - [GOV.UK Frontend on GitHub](https://github.com/alphagov/govuk-frontend) - Source code and releases
+- [GOV.UK Frontend Sass API](https://frontend.design-system.service.gov.uk/sass-api-reference/) - Sass functions, mixins, and variables
+- [GOV.UK Style Guide](https://www.gov.uk/guidance/style-guide/a-to-z-of-gov-uk-style) - Content and writing conventions
 
 ---
 
@@ -152,6 +317,14 @@ The GOV.UK Design System provides styles, components, and patterns to make gover
 - Must design mobile-first with GDS grid layout (max 1020px)
 - Must meet WCAG 2.2 AA colour contrast and provide alt text on all images
 - Must use GDS patterns for common tasks (names, addresses, dates, errors)
+
+*Visual Identity (make it look like GOV.UK):*
+- Black header bar with crown logo, grey footer with OGL notice
+- Font: "GDS Transport", arial, sans-serif -- body text at 19px desktop
+- Links: `#1a65a6`, visited `#54319f`, focus yellow `#ffdd00` with black outline
+- Input borders are black (`#0b0c0c`), not grey
+- Sentence case for all headings, buttons, and labels
+- DEFRA organisation colour: `#00a33b` (contrast-safe: `#008531`)
 
 *Quick Decision Guide:*
 When in doubt: **Does a GDS component or pattern already exist for this?** If yes, use it. If no, check the community backlog, then build the simplest accessible solution possible.
