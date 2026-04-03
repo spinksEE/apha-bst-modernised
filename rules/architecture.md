@@ -3,7 +3,7 @@
 **Version**: 1.0
 **Last Updated**: 2026-04-01
 **Tech Stack**: React + NestJS + Prisma + PostgreSQL + Docker
-**Auth**: Static credential login + JWT (POC)
+**Auth**: DB-backed user login + JWT (POC)
 
 ---
 
@@ -18,7 +18,7 @@ A modernised web application for the Animal and Plant Health Agency (APHA) to ma
 - **Monolithic Architecture**: Single NestJS backend serving a RESTful API
 - **SPA Frontend**: React + Vite, aligned to GOV.UK Design System principles
 - **Role-Based Access**: Three roles — Supervisor, Data Entry, Read Only
-- **Static Auth (POC)**: Single hardcoded credential for login demo; JWT-secured API
+- **DB-Backed Auth (POC)**: Username/password validated against the BST database; JWT-secured API
 - **Mobile-First**: 375px – 1920px responsive design
 - **Accessibility**: WCAG 2.1 AA compliant, GOV.UK Design System aligned
 - **Dockerised**: Complete local development environment
@@ -41,7 +41,7 @@ A modernised web application for the Animal and Plant Health Agency (APHA) to ma
 └─────────────────────────────────────────────────────────────────┘
 
 No External Services Required:
-  - Auth uses a single static credential (POC only)
+  - Auth uses BST database-backed users (POC only)
   - No Active Directory or SSO integration in this POC
 ```
 
@@ -164,9 +164,9 @@ apha-bst-modernised/
 
 ## Authentication & Authorisation
 
-### Strategy: Static Login (POC) + JWT API
+### Strategy: DB-Backed Login (POC) + JWT API
 
-This is a POC implementation. A single hardcoded credential (configurable via environment variable) is used to demonstrate the login flow. The backend issues a JWT on successful login; all subsequent API calls are JWT-authenticated.
+This is a POC implementation. User credentials are validated against the BST database. The backend issues a JWT on successful login; the frontend must include this JWT as a standard Bearer token with every subsequent API request for that user.
 
 In a production system, this would be replaced with an appropriate identity provider (e.g. Azure AD / Entra ID).
 
@@ -199,7 +199,7 @@ Local: http://localhost:3001/api
 ### Authentication Security
 - **JWT Tokens**: Signed with `HS256`; 8-hour expiry (business day window)
 - **Token Storage**: `localStorage` (acceptable for POC)
-- **Static Credential**: Configured via `ADMIN_PASSWORD` environment variable (POC only)
+- **Credential Source**: BST database user records (POC only)
 
 ### Authorization
 - **Guard-Protected Routes**: NestJS guards enforce JWT + role on every endpoint
@@ -228,7 +228,7 @@ Local: http://localhost:3001/api
 | Monolithic architecture | Small team, ~20 users, POC simplicity |
 | PostgreSQL over alternatives | Structured relational data; referential integrity essential for training records |
 | Column-based schema | Type safety, easier reporting queries, avoids JSON blob anti-pattern of legacy system |
-| Static credential auth (POC) | Demonstrates login workflow without requiring identity provider setup |
+| DB-backed auth (POC) | Demonstrates login workflow using BST user records without requiring identity provider setup |
 | JWT (no refresh tokens) | Short 8-hour expiry covers a working day; acceptable for POC |
 | Mantine UI | Accessible component library; can be themed to GOV.UK Design System principles |
 | Docker Compose | Reproducible local environment for demo purposes |
