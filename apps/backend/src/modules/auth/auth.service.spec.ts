@@ -108,6 +108,32 @@ describe('AuthService audit logging', () => {
     );
   });
 
+  it('logs access denied when user is missing role or location during login', async () => {
+    prisma.user.findFirst.mockResolvedValue({
+      id: 'user-5',
+      userName: 'user',
+      passwordHash: 'hash',
+      isActive: true,
+      role: null,
+      locationId: null,
+      name: 'Test User',
+      location: null,
+    });
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+    await expect(service.login('user', 'password', '127.0.0.1')).rejects.toBeInstanceOf(
+      ForbiddenException,
+    );
+
+    expect(auditLogService.logEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'ACCESS_DENIED',
+        severity: AuditSeverity.High,
+        userId: 'user-5',
+      }),
+    );
+  });
+
   it('logs successful login', async () => {
     prisma.user.findFirst.mockResolvedValue({
       id: 'user-1',
@@ -124,11 +150,130 @@ describe('AuthService audit logging', () => {
 
     await service.login('user', 'password', '127.0.0.1');
 
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'user-1' },
+      data: { lastActivityAt: expect.any(Date) },
+    });
     expect(auditLogService.logEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         eventType: 'AUTH_LOGIN_SUCCESS',
         userId: 'user-1',
         ipAddress: '127.0.0.1',
+      }),
+    );
+  });
+
+  it('updates last activity and returns user context on session validation', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-2',
+      isActive: true,
+      role: 'DataEntry',
+      locationId: 'loc-2',
+      name: 'Session User',
+      location: { name: 'Session Location' },
+    });
+
+    const result = await service.validateUser({
+      userId: 'user-2',
+      name: 'Session User',
+      role: 'DataEntry',
+      locationId: 'loc-2',
+      sessionId: 'session-2',
+    });
+
+    expect(prisma.user.update).toHaveBeenCalledWith({
+      where: { id: 'user-2' },
+      data: { lastActivityAt: expect.any(Date) },
+    });
+    expect(result).toEqual({
+      userId: 'user-2',
+      name: 'Session User',
+      role: 'DataEntry',
+      locationId: 'loc-2',
+      locationName: 'Session Location',
+      sessionId: 'session-2',
+    });
+  });
+
+  it('logs access denied when session user is missing', async () => {
+    prisma.user.findUnique.mockResolvedValue(null);
+
+    await expect(
+      service.validateUser({
+        userId: 'missing-user',
+        name: 'Missing',
+        role: 'Supervisor',
+        locationId: 'loc-3',
+        sessionId: 'session-3',
+      }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+
+    expect(auditLogService.logEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'ACCESS_DENIED',
+        severity: AuditSeverity.High,
+        userId: 'missing-user',
+        sessionId: 'session-3',
+      }),
+    );
+  });
+
+  it('logs access denied when session user is inactive', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-3',
+      isActive: false,
+      role: 'Supervisor',
+      locationId: 'loc-3',
+      name: 'Inactive User',
+      location: { name: 'Inactive Location' },
+    });
+
+    await expect(
+      service.validateUser({
+        userId: 'user-3',
+        name: 'Inactive User',
+        role: 'Supervisor',
+        locationId: 'loc-3',
+        sessionId: 'session-3',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(auditLogService.logEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'ACCESS_DENIED',
+        severity: AuditSeverity.High,
+        userId: 'user-3',
+        sessionId: 'session-3',
+      }),
+    );
+  });
+
+  it('logs access denied when session user is missing role or location', async () => {
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'user-4',
+      isActive: true,
+      role: null,
+      locationId: null,
+      name: 'Missing Role',
+      location: null,
+    });
+
+    await expect(
+      service.validateUser({
+        userId: 'user-4',
+        name: 'Missing Role',
+        role: 'Supervisor',
+        locationId: 'loc-4',
+        sessionId: 'session-4',
+      }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+
+    expect(auditLogService.logEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventType: 'ACCESS_DENIED',
+        severity: AuditSeverity.High,
+        userId: 'user-4',
+        sessionId: 'session-4',
       }),
     );
   });
