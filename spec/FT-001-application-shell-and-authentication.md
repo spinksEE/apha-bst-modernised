@@ -136,7 +136,6 @@ Scenario: Unauthorised User Access
   But I do not have BST system permissions configured
   When I attempt to access the system
   Then I am redirected to an unauthorised access page
-  And I am provided with contact information for access requests
 ```
 
 ### US-002: Home Page Navigation Hub
@@ -521,14 +520,10 @@ Scenario: Session lifecycle logging
 │  ║  You do not have permission to access the Brainstem        ║ │
 │  ║  Training System.                                          ║ │
 │  ║                                                            ║ │
-│  ║  Your access attempt has been logged and the system        ║ │
-│  ║  administrator has been notified.                          ║ │
+│  ║  Your access attempt has been logged.                       ║ │
 │  ║                                                            ║ │
 │  ║  If you believe you should have access to this system,     ║ │
-│  ║  please contact:                                           ║ │
-│  ║                                                            ║ │
-│  ║  Technical Support: bst-support@apha.gov.uk                ║ │
-│  ║  Phone: 01234 567890                                       ║ │
+│  ║  please contact your system administrator.                 ║ │
 │  ║                                                            ║ │
 │  ║  Reference ID: UA-20260331-1423-001 [1]                    ║ │
 │  ║                                                            ║ │
@@ -544,8 +539,6 @@ Scenario: Session lifecycle logging
 [1] Reference ID - unique identifier for this access attempt (for support tracking)
 [2] Return button - redirects to organisation homepage or logout
 
-**Background process:** Automatic email notification sent to technical support team with user details and access attempt information.
-
 **Acceptance Criteria:**
 
 ```gherkin
@@ -556,13 +549,6 @@ Scenario: Unauthorised user redirection
   Then I am immediately redirected to the access denied page
   And I see a clear message explaining the access restriction
   And I am provided with contact information for requesting access
-
-Scenario: Administrator notification of unauthorised access
-  Given an unauthorised access attempt occurs
-  When the system processes the access denial
-  Then an automatic email notification is sent to the technical support team
-  And the notification includes user identity, timestamp, attempted resource, and session details
-  And a unique reference ID is generated for tracking purposes
 
 Scenario: Unauthorised access audit logging
   Given an unauthorised access attempt is made
@@ -601,7 +587,7 @@ Scenario: Unauthorised access audit logging
 
 **Error/exception paths:**
 - Database connectivity issues: show system maintenance page
-- Invalid user permissions: redirect to access denied page and notify administrators
+- Invalid user permissions: redirect to access denied page
 
 ### Flow 2: Role-Based Feature Access Flow
 
@@ -719,7 +705,6 @@ Scenario: Unauthorised access audit logging
 - **Navigation context:** Post-authentication but pre-authorisation
 - **Components:**
   - Clear access denied message with explanation
-  - Contact information for access requests (email and phone)
   - Unique reference ID for support tracking
   - "Return" button to exit system gracefully
 
@@ -750,7 +735,6 @@ Scenario: Unauthorised access audit logging
 | BR-003  | User role determines available navigation functions | Home page navigation dropdowns | Filter dropdown menu items based on user role; hide restricted functions |
 | BR-004  | Screen-level permissions control data modification capabilities | Individual screen access | Query tblDataEntry for screen permissions; disable controls if CanWrite is "S" (restricted) |
 | BR-005  | All authentication and access events must be logged | Authentication and authorisation processes | Create audit log entry for every login, logout, access grant, and access denial |
-| BR-006  | Unauthorised access attempts trigger administrator notification | Access denial processing | Send automatic email to technical support team with user details and attempt context |
 | BR-007  | User context must be maintained consistently across all screens | Session management | Display user name, role, and location consistently; track identity for audit logging |
 | BR-008  | Session activity must be tracked for audit compliance | All user interactions | Update last activity timestamp and log significant user actions |
 | BR-009  | Role-specific help content must be displayed | Help system access | Filter help topics and content based on user role permissions |
@@ -782,14 +766,7 @@ No search functionality is implemented within the authentication and navigation 
 
 | System | Integration Type | Direction | Description | Criticality |
 |--------|-----------------|-----------|-------------|-------------|
-| SMTP Mail Server | Email protocol | Outbound | Automatic notification emails for unauthorised access attempts and system errors | Required |
 | SQL Server Database | Database connection | Bidirectional | User credential validation, permission validation, audit logging, and session management data storage | Required |
-
-**SMTP Integration Details:**
-- Configured for outbound notifications only
-- Sends structured email alerts for security events
-- Includes user identity, timestamp, and event context in notifications
-- Critical for security monitoring and incident response
 
 ## 12. Non-Functional Requirements
 
@@ -812,7 +789,7 @@ No search functionality is implemented within the authentication and navigation 
 | 2 | Some navigation elements (back to home buttons) do not function properly | User frustration and navigation confusion | Implement consistent navigation patterns with working breadcrumbs and return buttons | Improves user experience and reduces support calls |
 | 3 | Database passwords stored in plain text configuration files | Security vulnerability exposing credentials | Use encrypted connection strings and environment-based configuration | Eliminates credential exposure risk |
 | 4 | No session timeout controls implemented for idle users | Security risk from unattended sessions | Implement configurable session timeout with warning notifications | Reduces security risk while maintaining usability |
-| 5 | Error notifications contain sensitive system information sent via unencrypted email | Information disclosure in error reports | Sanitise error notifications and use secure notification channels | Protects system information while maintaining monitoring capability |
+| 5 | Error notifications contain sensitive system information | Information disclosure in error reports | Sanitise error information in logs and user-facing messages | Protects system information while maintaining monitoring capability |
 | 6 | No row-level security implemented, relying entirely on application-layer access control | Potential for data access bypass | Maintain application-layer security with additional database-level validation | Provides defence-in-depth security approach |
 
 ## 14. Internal System Dependencies
@@ -827,7 +804,6 @@ No search functionality is implemented within the authentication and navigation 
 | Dependency                                                        | Owner                        | Description              | Status                             |
 | ----------------------------------------------------------------- | ---------------------------- | ------------------------ | ---------------------------------- |
 | Database user credentials and permissions setup | Database Administrator | User credential and permission records must be configured in BST database User and DataEntry tables | Pending |
-| SMTP server configuration | IT Infrastructure Team | Email server must be configured for automated notifications | Pending |
 | Help content creation | Business Analyst | System help documentation must be written and reviewed | Pending |
 
 ## 16. Key Assumptions
@@ -835,7 +811,6 @@ No search functionality is implemented within the authentication and navigation 
 | # | Assumption | Risk if Invalid |
 |---|-----------|-----------------|
 | 1 | User credentials are stored in the BST database for POC purposes | Production deployment would require migration to an enterprise identity provider |
-| 2 | SMTP server is available and configured for automated notifications | Unauthorised access attempts would not trigger automatic alerts |
 | 3 | User permission data can be migrated accurately from legacy system database | Would require manual reconfiguration of all user access rights |
 | 4 | Business requirements for role-based access remain consistent with legacy system | Would require redesign of permission model and user interface |
 | 5 | Help content can be maintained by business users rather than technical staff | Would require ongoing technical resources for help system updates |
@@ -849,7 +824,7 @@ No search functionality is implemented within the authentication and navigation 
 | Unauthorised access incidents | Unknown (not tracked) | 100% logged and alerted | Audit log analysis |
 | User navigation efficiency | Unknown (not measured) | Maximum 3 clicks to reach any function | User interaction tracking |
 | Authentication-related support calls | Unknown baseline | Reduce through simple login flow | Support ticket analysis |
-| Security incident response time | Manual notification only | Automated alerts within 2 minutes | Email delivery monitoring |
+| Security incident response time | Manual notification only | Unauthorised access logged in audit trail | Audit log review |
 
 ## 18. Effort Estimate
 
