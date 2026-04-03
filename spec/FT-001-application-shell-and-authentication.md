@@ -220,40 +220,30 @@ Scenario: System announcements display
 
 **Wireframes:**
 
+> **Note:** The wireframe below uses a generic screen to illustrate RBAC enforcement. Specific screens will be implemented by downstream features.
+
 ```
 ╔═══════════════════════════════════════════════════════════════════╗
-║ Training Records - Read Only Access                               ║
+║ [Screen Title] - Read Only Access                                 ║
 ╠═══════════════════════════════════════════════════════════════════╣
 ║                                                                   ║
 ║ ┌─────────────────────────────────────────────────────────────┐   ║
-║ │ Training Record Details                                     │   ║
+║ │ [Screen content]                                            │   ║
 ║ │                                                             │   ║
-║ │ Trainee: |     Jane Wilson      | (disabled) [1]            │   ║
-║ │ Trainer: |     Bob Smith        | (disabled) [2]            │   ║
-║ │ Species: |     Cattle      ▼    | (disabled) [3]            │   ║
-║ │ Date:    |   15/03/2026         | (disabled) [4]            │   ║
-║ │                                                             │   ║
-║ │ Training Type: ( • ) Trained                                │   ║
-║ │                ( o ) Cascade Trained (disabled)             │   ║
-║ │                ( o ) Training Confirmed (disabled)          │   ║
-║ │                                                             │   ║
-║ │ Comments: |  Initial cattle training completed at site      │   ║
-║ │           |  (disabled)                              [5]    │   ║
+║ │ Field 1: |     Value            | (disabled) [1]            │   ║
+║ │ Field 2: |     Value       ▼    | (disabled) [2]            │   ║
 ║ │                                                             │   ║
 ║ └─────────────────────────────────────────────────────────────┘   ║
 ║                                                                   ║
-║ Note: You have read-only access to this record                    ║
+║ Note: You have read-only access to this screen                    ║
 ║                                                                   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 ```
 
-[1] Trainee field - disabled for read-only access
-[2] Trainer field - disabled for read-only access
-[3] Species dropdown - disabled for read-only access
-[4] Date field - disabled for read-only access
-[5] Comments field - disabled for read-only access
+[1] Text input - disabled for read-only access
+[2] Dropdown - disabled for read-only access
 
-**Data Entry view:** Fields would be enabled based on screen-level permissions configured in tblDataEntry table.
+**Data Entry view:** Fields would be enabled based on screen-level permissions configured in data_entry table.
 
 **Supervisor view:** All fields enabled for full editing capabilities.
 
@@ -270,7 +260,7 @@ Scenario: Read-Only user access enforcement
 
 Scenario: Data Entry user screen-level permissions
   Given I am authenticated with "Data Entry" role
-  And a screen has "CanWrite" permission set to "S" (restricted) for my user
+  And a screen has "can_write" permission set to "S" (restricted) for my user
   When I access that specific screen
   Then all controls are disabled similar to read-only access
   And I cannot modify data on this particular screen
@@ -377,11 +367,13 @@ Scenario: Role-appropriate help content
 
 **Wireframes:**
 
+> **Note:** The wireframe below uses a generic screen to illustrate session and user context. Specific screens will be implemented by downstream features.
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ BST System - Training Records             Welcome: John Smith   │
+│ BST System - [Screen Title]               Welcome: John Smith   │
 ├─────────────────────────────────────────────────────────────────┤
-│ Home > Training Records > Add New Record                        │
+│ Home > [Section] > [Screen]                                     │
 │                                                                 │
 │ ╔═════════════════════════════════════════════════════════════╗ │
 │ ║ Session Status: Active (2 hours 15 minutes)           [1]   ║ │
@@ -389,12 +381,7 @@ Scenario: Role-appropriate help content
 │ ╚═════════════════════════════════════════════════════════════╝ │
 │                                                                 │
 │ ┌─────────────────────────────────────────────────────────────┐ │
-│ │ New Training Record                                         │ │
-│ │                                                             │ │
-│ │ Trainee: |                    | [2]                         │ │
-│ │ Trainer: |    John Smith      | (auto-populated) [3]        │ │
-│ │ Species: |          ▼         | [4]                         │ │
-│ │ Date:    |   31/03/2026       | (today) [5]                 │ │
+│ │ [Screen content]                                            │ │
 │ │                                                             │ │
 │ └─────────────────────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────────────────────┤
@@ -403,10 +390,6 @@ Scenario: Role-appropriate help content
 ```
 
 [1] Session indicator - shows active session time and last activity
-[2] Trainee field - normal data entry
-[3] Trainer field - auto-populated with current user context
-[4] Species dropdown - available options
-[5] Date field - defaults to current date
 
 **Session timeout warning:** Modal dialog appears 10 minutes before session expiry warning user and providing option to extend session.
 
@@ -428,12 +411,10 @@ Scenario: Session activity tracking
   And audit logs capture my activities with proper user identification
 
 Scenario: Auto-population of user context in forms
-  Given I am creating a new training record
-  And I am configured as a qualified trainer
-  When I access the new training record form
-  Then the Trainer field is automatically populated with my name
-  And the training date defaults to today's date
-  And my location context is available for site selection
+  Given I am creating a new record on any downstream feature screen
+  When I access the form
+  Then relevant fields are automatically populated with my user context
+  And my location context is available where applicable
 ```
 
 ### US-006: Audit Logging for Authentication Events
@@ -536,7 +517,7 @@ Scenario: Session lifecycle logging
 ```
 
 [1] Reference ID - unique identifier for this access attempt (for support tracking)
-[2] Return button - redirects to organisation homepage or logout
+[2] Return button - redirects to the login page
 
 **Acceptance Criteria:**
 
@@ -569,10 +550,9 @@ Scenario: Unauthorised access audit logging
 1. Browser requests BST system homepage
 2. Unauthenticated user is redirected to login page
 3. User enters username and password on login form
-4. System validates credentials against User table in database
-5. System checks user permissions in BST database (user table)
-6. If authorised, system creates user session and redirects to home page
-7. Home page displays with user context (name, role, location) and role-appropriate navigation options
+4. System validates credentials and checks user permissions against user table in database
+5. If authorised, system creates user session and redirects to home page
+6. Home page displays with user context (name, role, location) and role-appropriate navigation options
 
 **Decision points:**
 - Authentication success/failure determines whether user proceeds or sees error on login form
@@ -655,7 +635,7 @@ Scenario: Unauthorised access audit logging
 **Header region components:**
 - **System title:** "BST System", left-aligned
 - **User context display:** "Welcome: [FirstName LastName] ([Role]) - [Location]", right-aligned
-- **Help dropdown:** "[Help ▼]" button, right-aligned, opens help menu with "System Help" and "Contact Support" options
+- **Help dropdown:** "[Help ▼]" button, right-aligned, opens help menu with "System Help" and "Contact Support" options. "Contact Support" links to an in-app page displaying the BST support team email address and phone number
 
 **Main content area components:**
 - **Welcome panel:** Panel containing user greeting with full context
@@ -691,7 +671,6 @@ Scenario: Unauthorised access audit logging
   - Username and password input fields
   - "Log In" submit button
   - Error message area for failed login attempts
-  - Corporate branding (APHA logo if available)
 
 **Access Denied page:**
 - **Purpose:** Displayed when authenticated user lacks system permissions
@@ -724,14 +703,14 @@ Scenario: Unauthorised access audit logging
 | Rule ID | Rule Description                               | Applies To                                         | Validation Behaviour                                                          |
 | ------- | ---------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------- |
 | BR-001  | Login authentication is mandatory for all system access | All system entry points | If not authenticated, redirect to login page; if credentials invalid, show error message |
-| BR-002  | Users must have valid BST permissions configured in database | User access validation | Check User table for valid record; if not found, redirect to access denied page |
+| BR-002  | Users must have valid BST permissions configured in database | User access validation | Check user table for valid record; if not found, redirect to access denied page |
 | BR-003  | User role determines available navigation functions | Home page navigation dropdowns | Filter dropdown menu items based on user role; hide restricted functions |
-| BR-004  | Screen-level permissions control data modification capabilities | Individual screen access | Query tblDataEntry for screen permissions; disable controls if CanWrite is "S" (restricted) |
+| BR-004  | Screen-level permissions control data modification capabilities | Individual screen access | Query data_entry for screen permissions; disable controls if can_write is "S" (restricted) |
 | BR-005  | All authentication and access events must be logged | Authentication and authorisation processes | Create audit log entry for every login, logout, access grant, and access denial |
-| BR-007  | User context must be maintained consistently across all screens | Session management | Display user name, role, and location consistently; track identity for audit logging |
-| BR-008  | Session activity must be tracked for audit compliance | All user interactions | Update last activity timestamp and log significant user actions |
-| BR-009  | Role-specific help content must be displayed | Help system access | Filter help topics and content based on user role permissions |
-| BR-010  | System announcements are displayed to all authenticated users | Home page display | Show current announcements to all users regardless of role |
+| BR-006  | User context must be maintained consistently across all screens | Session management | Display user name, role, and location consistently; track identity for audit logging |
+| BR-007  | Session activity must be tracked for audit compliance | All user interactions | Update last activity timestamp and log significant user actions |
+| BR-008  | Role-specific help content must be displayed | Help system access | Filter help topics and content based on user role permissions |
+| BR-009  | System announcements are displayed to all authenticated users | Home page display | Show current announcements to all users regardless of role |
 
 ## 10. Data Model and Requirements
 
@@ -739,10 +718,10 @@ Scenario: Unauthorised access audit logging
 
 | Entity | Key Attributes | Description |
 |--------|---------------|-------------|
-| User | UserId, UserName, UserLocation, UserLevel | System user with role-based access permissions |
-| APHALocation | LocationId, LocationName, IsAHVLA | APHA facility or organisational unit |
-| AuditLog | LogId, UserId, Timestamp, EventType, Details, IPAddress | System audit trail for security and compliance |
-| DataEntry | ScreenName, UserId, CanWrite | Screen-level permissions for Data Entry users |
+| user | user_id, user_name, user_location, user_level | System user with role-based access permissions |
+| apha_location | location_id, location_name, is_ahvla | APHA facility or organisational unit |
+| audit_log | log_id, user_id, timestamp, event_type, details, ip_address | System audit trail for security and compliance |
+| data_entry | screen_name, user_id, can_write | Screen-level permissions for Data Entry users |
 
 ### Search Parameters
 
@@ -750,10 +729,10 @@ No search functionality is implemented within the authentication and navigation 
 
 ### Data Relationships
 
-- **User → APHALocation:** Many-to-one relationship where each user is assigned to one APHA location
-- **User → AuditLog:** One-to-many relationship where each user can have multiple audit log entries
-- **User → DataEntry:** One-to-many relationship where each Data Entry user has multiple screen-level permissions configured
-- **APHALocation:** Referenced by multiple entities across the system for location-based filtering and reporting
+- **user → apha_location:** Many-to-one relationship where each user is assigned to one APHA location
+- **user → audit_log:** One-to-many relationship where each user can have multiple audit log entries
+- **user → data_entry:** One-to-many relationship where each Data Entry user has multiple screen-level permissions configured
+- **apha_location:** Referenced by multiple entities across the system for location-based filtering and reporting
 
 ## 11. Integration Points and External Dependencies
 
@@ -769,9 +748,8 @@ No search functionality is implemented within the authentication and navigation 
 | NFR-002 | Performance | Home page load time | Page loads within 3 seconds for typical user scenarios |
 | NFR-003 | Security | Session management | User sessions maintain security context and track activity |
 | NFR-004 | Audit | Authentication event logging | All login/logout events logged with complete user context |
-| NFR-005 | Availability | Authentication service uptime | 99% availability during business hours (8 AM - 6 PM weekdays) |
 | NFR-006 | Accessibility | Screen reader compatibility | Navigation structure accessible via keyboard and screen readers |
-| NFR-007 | Compliance | Audit trail retention | Authentication and access logs retained for minimum 7 years |
+| NFR-007 | Compliance | Audit trail retention | Authentication and access logs retained in the database; no specific retention period enforced for POC |
 | NFR-008 | Security | Unauthorised access response | Access denials processed and logged within 2 seconds |
 
 ## 13. Internal System Dependencies
@@ -785,7 +763,7 @@ No search functionality is implemented within the authentication and navigation 
 
 | Dependency                                                        | Owner                        | Description              | Status                             |
 | ----------------------------------------------------------------- | ---------------------------- | ------------------------ | ---------------------------------- |
-| Database user credentials and permissions setup | Database Administrator | User credential and permission records must be configured in BST database User and DataEntry tables | Pending |
+| Database user credentials and permissions setup | Database Administrator | User credential and permission records must be configured in BST database user and data_entry tables | Pending |
 | Help content creation | Business Analyst | System help documentation must be written and reviewed | Pending |
 
 ## 15. Key Assumptions
@@ -793,8 +771,8 @@ No search functionality is implemented within the authentication and navigation 
 | # | Assumption | Risk if Invalid |
 |---|-----------|-----------------|
 | 1 | User credentials are stored in the BST database for POC purposes | Production deployment would require migration to an enterprise identity provider |
-| 3 | User permission data model supports the required role-based access patterns | Would require redesign of permission model and user interface |
-| 5 | Help content can be maintained by business users rather than technical staff | Would require ongoing technical resources for help system updates |
+| 2 | User permission data model supports the required role-based access patterns | Would require redesign of permission model and user interface |
+| 3 | Help content can be maintained by business users rather than technical staff | Would require ongoing technical resources for help system updates |
 
 ## 16. Success Metrics and KPIs
 
