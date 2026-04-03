@@ -653,34 +653,28 @@ Scenario: Unauthorised access audit logging
 - **Footer region:** Copyright notice and system version information
 
 **Header region components:**
-- **System title:** "BST System" text, left-aligned, Arial 16pt bold
-- **User context display:** "Welcome: [FirstName LastName] ([Role]) - [Location]" text, right-aligned
+- **System title:** "BST System", left-aligned
+- **User context display:** "Welcome: [FirstName LastName] ([Role]) - [Location]", right-aligned
 - **Help dropdown:** "[Help ▼]" button, right-aligned, opens help menu with "System Help" and "Contact Support" options
 
 **Main content area components:**
-- **Welcome panel:** Double-line border panel containing user greeting with full context
+- **Welcome panel:** Panel containing user greeting with full context
   - Content format: "Welcome: [FirstName LastName] ([Role]) - [Location]"
-  - Background: light blue (#F0F8FF)
-  - Text: Arial 12pt
 - **Navigation panels:** Grid of dropdown panels arranged in 2x3 layout
   - **Training Records panel:** Button with "Training Records ▼" label, opens dropdown with training management functions
   - **Site Management panel:** Button with "Site Management ▼" label, opens dropdown with site functions
   - **Personnel Management panel:** Button with "Personnel Mgmt ▼" label, opens dropdown with personnel functions
   - **Reports panel:** Button with "Reports ▼" label, opens dropdown with reporting functions
   - **User Management panel:** Button with "User Management ▼" label (Supervisor only), opens admin functions
-  - **Panel styling:** Raised button appearance, Arial 11pt, minimum 150px width, 40px height
-- **System announcements panel:** Double-line border panel for administrative messages
-  - Header: "System Announcements" in bold
+- **System announcements panel:** Panel for administrative messages
+  - Header: "System Announcements"
   - Content: Bulleted list of current announcements
   - Maximum 5 announcements displayed
-  - Background: light yellow (#FFFACD) for visibility
 
 **Footer region:**
-- Copyright text: "APHA BST System © 2026" centred, Arial 10pt grey text
+- Copyright text: "APHA BST System © 2026"
 
 **Interaction states:**
-- **Dropdown hover:** Panel background changes to light blue, cursor changes to pointer
-- **Dropdown active:** Panel depressed appearance, dropdown menu appears below
 - **Loading state:** "Loading..." text appears in main content area
 - **Empty announcements:** Announcements panel shows "No current system announcements"
 - **Error state:** Replace content with error message and "Try Again" button
@@ -692,7 +686,7 @@ Scenario: Unauthorised access audit logging
 **Login page:**
 - **Purpose:** Displayed to unauthenticated users
 - **Navigation context:** Pre-authentication state, no system navigation available
-- **Layout:** Centred login form on plain background
+- **Layout:** Centred login form
 - **Components:**
   - Username and password input fields
   - "Log In" submit button
