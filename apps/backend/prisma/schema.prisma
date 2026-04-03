@@ -13,3 +13,64 @@ model HealthCheck {
   status    String
   checkedAt DateTime @default(now())
 }
+
+enum UserRole {
+  Supervisor
+  DataEntry
+  ReadOnly
+  SystemAdministrator
+}
+
+enum AuditSeverity {
+  Low
+  Medium
+  High
+  Critical
+}
+
+model AphaLocation {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+
+  @@map("apha_location")
+}
+
+model User {
+  id             String   @id @default(uuid())
+  userName       String   @unique @map("user_name")
+  passwordHash   String   @map("password_hash")
+  name           String
+  role           UserRole
+  isActive       Boolean  @default(true) @map("is_active")
+  locationId     String   @map("location_id")
+  lastActivityAt DateTime? @map("last_activity_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  location AphaLocation @relation(fields: [locationId], references: [id])
+  auditLogs AuditLog[]
+
+  @@map("user")
+}
+
+model AuditLog {
+  id          String        @id @default(uuid())
+  userId      String?       @map("user_id")
+  eventType   String        @map("event_type")
+  severity    AuditSeverity @default(Low)
+  ipAddress   String?       @map("ip_address")
+  sessionId   String?       @map("session_id")
+  details     Json?
+  createdAt   DateTime      @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([eventType, createdAt])
+  @@map("audit_log")
+}
