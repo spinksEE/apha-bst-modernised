@@ -1,4 +1,5 @@
 import { AppShell } from '../components/AppShell';
+import { ReadOnlyNotice, useReadOnlyAccess } from '../components/readOnly';
 import { formatUserContext, formatUserRole } from '../components/userContext';
 import { useAuthStore } from '../store/auth';
 import type { UserContext, UserRole } from '../types/auth';
@@ -93,6 +94,7 @@ const getRoleDescription = (role: UserRole): string => {
 
 export function HomePage(): React.JSX.Element {
   const userContext = useAuthStore((state) => state.userContext);
+  const { isReadOnly } = useReadOnlyAccess();
 
   if (!userContext) {
     return (
@@ -128,6 +130,7 @@ export function HomePage(): React.JSX.Element {
       >
         <div style={{ fontWeight: 700 }}>{userContextLabel}</div>
         <div style={{ color: '#475569' }}>{getRoleDescription(userContext.role)}</div>
+        <ReadOnlyNotice isReadOnly={isReadOnly} />
       </section>
 
       <section aria-label="Navigation overview" style={{ marginTop: '2rem' }}>
