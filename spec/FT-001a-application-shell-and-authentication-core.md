@@ -1,17 +1,17 @@
-# FT-001: Application Shell & Authentication
+# FT-001a: Application Shell & Authentication (Core)
 
 ## Metadata
 
-| Field                   | Value                                                                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| **Feature ID**          | FT-001                                                                                                                         |
-| **Upstream Features**   | None                                                                                                                           |
-| **Downstream Features** | FT-002, FT-003, FT-004, FT-005, FT-006                                                                                         |
-| **Feature Name**        | Application Shell & Authentication                                                                                             |
-| **Owner**               | System Administrator                                                                                                           |
-| **Priority**            | Must                                                                                                                           |
-| **Last Updated**        | 2026-03-31                                                                                                                     |
-| **PRD Reference**       | Section 10 — Roles & Permissions; System Administration bounded context (authentication)  |
+| Field                   | Value                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------ |
+| **Feature ID**          | FT-001a                                                                                    |
+| **Upstream Features**   | None                                                                                       |
+| **Downstream Features** | FT-001b, FT-002, FT-003, FT-004, FT-005, FT-006                                           |
+| **Feature Name**        | Application Shell & Authentication (Core)                                                  |
+| **Owner**               | System Administrator                                                                       |
+| **Priority**            | Must                                                                                       |
+| **Last Updated**        | 2026-04-03                                                                                 |
+| **PRD Reference**       | Section 10 — Roles & Permissions; System Administration bounded context (authentication)   |
 
 ---
 
@@ -38,13 +38,13 @@ All users require authentication and navigation capabilities to access any syste
 
 ## 4. User Goals and Success Criteria
 
-| #   | User Goal                                    | Success Criterion                                                 |
-| --- | -------------------------------------------- | ----------------------------------------------------------------- |
-| 1   | Access the system using login credentials | User logs in via a simple login form with username and password |
-| 2   | Navigate to system functions efficiently | User can reach any permitted function within 3 clicks from home page |
-| 3   | Understand their access level and restrictions | User interface clearly indicates their role and available functions |
-| 4   | Get help when needed | User can access contextual help and system documentation |
-| 5   | Maintain session throughout work | System tracks user activity and maintains session |
+| #   | User Goal                                        | Success Criterion                                                     |
+| --- | ------------------------------------------------ | --------------------------------------------------------------------- |
+| 1   | Access the system using login credentials        | User logs in via a simple login form with username and password        |
+| 2   | Navigate to system functions efficiently         | User can reach any permitted function within 3 clicks from home page  |
+| 3   | Understand their access level and restrictions   | User interface clearly indicates their role and available functions    |
+| 4   | Get help when needed                             | User can access contextual help and system documentation (FT-001b)    |
+| 5   | Maintain session throughout work                 | System tracks user activity and maintains session                     |
 
 ## 5. Scope and Boundaries
 
@@ -54,7 +54,6 @@ All users require authentication and navigation capabilities to access any syste
 - Home page serving as central navigation hub
 - Role-based access control system (Supervisor, Data Entry, Read-Only)
 - User session management and identity tracking
-- Help system providing user guidance and documentation
 - Application shell framework (header, navigation, content areas)
 - Basic audit logging for authentication and access events
 - Unauthorised access handling and redirection
@@ -62,6 +61,11 @@ All users require authentication and navigation capabilities to access any syste
 
 ### Out of Scope
 
+- Help system — deferred to FT-001b
+- System announcements — deferred to FT-001b
+- Screen-level permissions (data_entry table) — deferred to FT-001b
+- Audit log viewer UI — deferred to FT-001b
+- Session timeout modal — deferred to FT-001b
 - News system functionality — not required
 - Detailed business function implementations — covered by downstream features FT-002 through FT-006
 - Complex reporting functionality — covered by separate reporting feature
@@ -147,7 +151,7 @@ Scenario: Unauthorised User Access
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ BST System - Home                                      [Help ▼] │
+│ BST System - Home                                               │
 ├─────────────────────────────────────────────────────────────────┤
 │ ╔═════════════════════════════════════════════════════════════╗ │
 │ ║ Welcome: John Smith (Supervisor) - Preston Laboratory       ║ │
@@ -168,11 +172,6 @@ Scenario: Unauthorised User Access
 │ │ [5]                 │                                         │
 │ └─────────────────────┘                                         │
 │                                                                 │
-│ ╔═════════════════════════════════════════════════════════════╗ │
-│ ║ System Announcements                                        ║ │
-│ ║ • System maintenance scheduled for Sunday 2nd April         ║ │
-│ ║ • New training guidance available in Help section           ║ │
-│ ╚═════════════════════════════════════════════════════════════╝ │
 ├─────────────────────────────────────────────────────────────────┤
 │ APHA BST System © 2026                                          │
 └─────────────────────────────────────────────────────────────────┘
@@ -204,12 +203,6 @@ Scenario: Navigation dropdowns show role-appropriate functions
   When I view the home page
   Then I see Training Records, Site Management, Personnel Management, Reports, and User Management dropdown menus
   And each dropdown contains functions appropriate to Supervisor permissions
-
-Scenario: System announcements display
-  Given I am on the home page
-  When system announcements are configured
-  Then I see the announcements in a dedicated panel
-  And announcements display in chronological order with most recent first
 ```
 
 ### US-003: Role-Based Access Control Enforcement
@@ -243,9 +236,9 @@ Scenario: System announcements display
 [1] Text input - disabled for read-only access
 [2] Dropdown - disabled for read-only access
 
-**Data Entry view:** Fields would be enabled based on screen-level permissions configured in data_entry table.
-
 **Supervisor view:** All fields enabled for full editing capabilities.
+
+> **Note:** Screen-level permissions for Data Entry users (data_entry table) are deferred to FT-001b.
 
 **Acceptance Criteria:**
 
@@ -258,14 +251,6 @@ Scenario: Read-Only user access enforcement
   And save/edit buttons are not displayed or are disabled
   And I see a message indicating my access level
 
-Scenario: Data Entry user screen-level permissions
-  Given I am authenticated with "Data Entry" role
-  And a screen has "can_write" permission set to "S" (restricted) for my user
-  When I access that specific screen
-  Then all controls are disabled similar to read-only access
-  And I cannot modify data on this particular screen
-  And other screens with appropriate permissions remain editable
-
 Scenario: Supervisor full access
   Given I am authenticated with "Supervisor" role
   When I access any system screen
@@ -274,92 +259,7 @@ Scenario: Supervisor full access
   And administrative functions are accessible
 ```
 
-### US-004: Help System Access
-
-**Story:** As a system user, I want to access help documentation and guidance, so that I can understand how to use system features effectively and resolve issues independently.
-
-**Priority:** Should
-
-**Wireframes:**
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│ BST System - Help                                    [Home]     │
-├─────────────────────────────────────────────────────────────────┤
-│ ╔═════════════════════════════════════════════════════════════╗ │
-│ ║ Help Topics                                                 ║ │
-│ ║                                                             ║ │
-│ ║ • Getting Started [1]                                       ║ │
-│ ║ • Training Records Management [2]                           ║ │
-│ ║ • Site Management [3]                                       ║ │
-│ ║ • Personnel Management [4]                                  ║ │
-│ ║ • Generating Reports [5]                                    ║ │
-│ ║ • User Management (Admin) [6]                               ║ │
-│ ║ • Troubleshooting [7]                                       ║ │
-│ ║ • Contact Information [8]                                   ║ │
-│ ║                                                             ║ │
-│ ╚═════════════════════════════════════════════════════════════╝ │
-│                                                                 │
-│ ╔═════════════════════════════════════════════════════════════╗ │
-│ ║ Getting Started                                             ║ │
-│ ║                                                             ║ │
-│ ║ Welcome to the Brainstem Training System (BST). This        ║ │
-│ ║ system helps APHA staff manage training records for         ║ │
-│ ║ brainstem sampling procedures.                              ║ │
-│ ║                                                             ║ │
-│ ║ Your Access Level: Supervisor                               ║ │
-│ ║ You have full access to all system functions including      ║ │
-│ ║ data entry, reporting, and user management.                 ║ │
-│ ║                                                             ║ │
-│ ║ [Screenshot: Home Page Navigation]                          ║ │
-│ ║                                                             ║ │
-│ ║ To navigate the system:                                     ║ │
-│ ║ 1. Start from the Home page                                 ║ │
-│ ║ 2. Use dropdown menus to access functions                   ║ │
-│ ║ 3. Use breadcrumbs to track your location                   ║ │
-│ ║                                                             ║ │
-│ ╚═════════════════════════════════════════════════════════════╝ │
-├─────────────────────────────────────────────────────────────────┤
-│ APHA BST System © 2026                                          │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-[1] Getting Started - basic system introduction and navigation
-[2] Training Records Management - help for training record functions
-[3] Site Management - help for site and location functions
-[4] Personnel Management - help for trainee/trainer functions
-[5] Generating Reports - help for reporting functions
-[6] User Management - admin help (Supervisor only)
-[7] Troubleshooting - common issues and solutions
-[8] Contact Information - technical support details
-
-**Context-sensitive help:** When accessed from specific screens via Help dropdown, the help system opens to the relevant topic section.
-
-**Acceptance Criteria:**
-
-```gherkin
-Scenario: General help access from home page
-  Given I am on the home page
-  When I click the Help dropdown menu
-  Then I see options to access different help topics
-  And I can select "System Help" to view the main help page
-  And the help page displays topics relevant to my role
-
-Scenario: Context-sensitive help access
-  Given I am on the Training Records screen
-  When I access help from the Help dropdown
-  Then the help system opens to the Training Records Management section
-  And I see guidance specific to the current screen functionality
-
-Scenario: Role-appropriate help content
-  Given I am authenticated with "Data Entry" role
-  When I access the help system
-  Then I see help topics for functions available to my role
-  And User Management help topics are not displayed
-  And my access level is clearly indicated in the help content
-```
-
-### US-005: Session Management and User Context
+### US-004: Session Management and User Context
 
 **Story:** As an authenticated user, I want the system to maintain my session and user context consistently, so that I don't lose my work or have to re-authenticate frequently during normal system use.
 
@@ -375,11 +275,6 @@ Scenario: Role-appropriate help content
 ├─────────────────────────────────────────────────────────────────┤
 │ Home > [Section] > [Screen]                                     │
 │                                                                 │
-│ ╔═════════════════════════════════════════════════════════════╗ │
-│ ║ Session Status: Active (2 hours 15 minutes)           [1]   ║ │
-│ ║ Last Activity: 14:23                                        ║ │
-│ ╚═════════════════════════════════════════════════════════════╝ │
-│                                                                 │
 │ ┌─────────────────────────────────────────────────────────────┐ │
 │ │ [Screen content]                                            │ │
 │ │                                                             │ │
@@ -388,10 +283,6 @@ Scenario: Role-appropriate help content
 │ User: John Smith | Role: Supervisor | Location: Preston Lab     │
 └─────────────────────────────────────────────────────────────────┘
 ```
-
-[1] Session indicator - shows active session time and last activity
-
-**Session timeout warning:** Modal dialog appears 10 minutes before session expiry warning user and providing option to extend session.
 
 **Acceptance Criteria:**
 
@@ -417,44 +308,13 @@ Scenario: Auto-population of user context in forms
   And my location context is available where applicable
 ```
 
-### US-006: Audit Logging for Authentication Events
+### US-005: Audit Logging for Authentication Events
 
 **Story:** As a system administrator, I want authentication and access events to be automatically logged, so that I can monitor system security and track user activity for compliance purposes.
 
 **Priority:** Must
 
-**Wireframes:**
-
-```
-╔═══════════════════════════════════════════════════════════════════╗
-║ System Administration - Audit Log Viewer (Supervisor Only)        ║
-╠═══════════════════════════════════════════════════════════════════╣
-║                                                                   ║
-║ ┌─────────────────────────────────────────────────────────────┐   ║
-║ │ Filter: [Authentication Events ▼] [1]  [ Apply Filter ]     │   ║
-║ │ Date Range: |01/03/2026| to |31/03/2026| [2]                │   ║
-║ └─────────────────────────────────────────────────────────────┘   ║
-║                                                                   ║
-║ ┌─────────────────────────────────────────────────────────────┐   ║
-║ │ Timestamp     │ User ID      │ Event        │ Details       │   ║
-║ ├─────────────────────────────────────────────────────────────┤   ║
-║ │ 31/03 14:23   │ jsmith      │ Login        │ Successful     │   ║
-║ │ 31/03 14:22   │ bwilson     │ Access Denied│ No permissions │   ║
-║ │ 31/03 14:20   │ jdoe        │ Login        │ Successful     │   ║
-║ │ 31/03 14:15   │ mchen       │ Logout       │ Session ended  │   ║
-║ │ 31/03 14:10   │ jsmith      │ Screen Access│ Training Recs  │   ║
-║ └─────────────────────────────────────────────────────────────┘   ║
-║                                                                   ║
-║ [ Export to Excel ] [3]                   Records: 1,247          ║
-║                                                                   ║
-╚═══════════════════════════════════════════════════════════════════╝
-```
-
-[1] Event type filter - Authentication Events, Data Access, Data Modifications
-[2] Date range selector for audit log filtering
-[3] Export function for audit analysis
-
-**Note:** This wireframe shows the administrative view for reviewing audit logs. The actual logging happens automatically in the background.
+> **Note:** This user story covers the backend logging mechanism. The audit log viewer UI is deferred to FT-001b.
 
 **Acceptance Criteria:**
 
@@ -481,7 +341,7 @@ Scenario: Session lifecycle logging
   And abnormal session terminations are flagged appropriately
 ```
 
-### US-007: Unauthorised Access Handling
+### US-006: Unauthorised Access Handling
 
 **Story:** As a system administrator, I want unauthorised access attempts to be properly handled and logged, so that system security is maintained and potential security issues are identified promptly.
 
@@ -574,17 +434,16 @@ Scenario: Unauthorised access audit logging
 
 **Step-by-step actions:**
 1. User selects dropdown menu (e.g., Training Records, Site Management)
-2. System queries user's role and screen-level permissions
+2. System queries user's role
 3. Dropdown displays only permitted functions for user's role
 4. User selects specific function from dropdown
 5. System validates access permissions for selected function
 6. If permitted, user is directed to requested screen
-7. Screen loads with role-appropriate interface (read-only, restricted edit, or full edit)
+7. Screen loads with role-appropriate interface (read-only or full edit)
 
 **Decision points:**
 - User role determines which functions appear in dropdown menus
-- Screen-level permissions determine whether user can access specific functions
-- User permissions determine interface mode (read-only vs. editable)
+- User role determines interface mode (read-only vs. editable)
 
 **Exit points:**
 - Permitted access leads to functional screen with appropriate interface mode
@@ -595,32 +454,6 @@ Scenario: Unauthorised access audit logging
 - Permission check failure: redirect to unauthorised access page
 - Screen loading error: display error message with option to return to home page
 
-### Flow 3: Help Access and Support Flow
-
-**Entry point:** User clicks Help dropdown from any system screen
-
-**Step-by-step actions:**
-1. User accesses Help dropdown menu
-2. System presents help options including general system help and context-sensitive help
-3. User selects appropriate help option
-4. System opens help screen with relevant content
-5. Help content is filtered based on user's role and permissions
-6. User navigates through help topics using menu or search
-7. User can return to previous screen or navigate to different system area
-
-**Decision points:**
-- Current screen context determines which help topics are most relevant
-- User role determines which help content is displayed
-
-**Exit points:**
-- User returns to previous screen after finding needed information
-- User navigates to different system function from help guidance
-- User contacts support using provided contact information
-
-**Error/exception paths:**
-- Help content unavailable: display message with alternative support options
-- Navigation error: provide breadcrumb trail back to previous location
-
 ## 8. UI/Layout Specifications
 
 ### 8.1 Home Page — Core Navigation Workflow
@@ -628,14 +461,13 @@ Scenario: Unauthorised access audit logging
 **Page title and navigation context:** BST System - Home (primary landing page after authentication)
 
 **Layout structure:**
-- **Header region:** System title on left, user context and help dropdown on right
-- **Main content area:** Welcome message with user details, navigation dropdown panels, system announcements
+- **Header region:** System title on left, user context on right
+- **Main content area:** Welcome message with user details, navigation dropdown panels
 - **Footer region:** Copyright notice and system version information
 
 **Header region components:**
 - **System title:** "BST System", left-aligned
 - **User context display:** "Welcome: [FirstName LastName] ([Role]) - [Location]", right-aligned
-- **Help dropdown:** "[Help ▼]" button, right-aligned, opens help menu with "System Help" and "Contact Support" options. "Contact Support" links to an in-app page displaying the BST support team email address and phone number
 
 **Main content area components:**
 - **Welcome panel:** Panel containing user greeting with full context
@@ -646,22 +478,17 @@ Scenario: Unauthorised access audit logging
   - **Personnel Management panel:** Button with "Personnel Mgmt ▼" label, opens dropdown with personnel functions
   - **Reports panel:** Button with "Reports ▼" label, opens dropdown with reporting functions
   - **User Management panel:** Button with "User Management ▼" label (Supervisor only), opens admin functions
-- **System announcements panel:** Panel for administrative messages
-  - Header: "System Announcements"
-  - Content: Bulleted list of current announcements
-  - Maximum 5 announcements displayed
 
 **Footer region:**
 - Copyright text: "APHA BST System © 2026"
 
 **Interaction states:**
 - **Loading state:** "Loading..." text appears in main content area
-- **Empty announcements:** Announcements panel shows "No current system announcements"
 - **Error state:** Replace content with error message and "Try Again" button
 
 **Responsive behaviour:** Layout adapts to browser width, navigation panels stack vertically on narrow screens
 
-### 8.2 Authentication Pages — Secondary Workflow
+### 8.2 Authentication Pages
 
 **Login page:**
 - **Purpose:** Displayed to unauthenticated users
@@ -680,48 +507,26 @@ Scenario: Unauthorised access audit logging
   - Unique reference ID for support tracking
   - "Return" button to exit system gracefully
 
-### 8.3 Help System — Secondary Workflow
-
-**Main Help page:**
-- **Purpose:** Comprehensive help documentation and user guidance
-- **Navigation context:** Accessible via Help dropdown from any screen
-- **Layout:** Two-panel layout with topic menu on left, content on right
-- **Components:**
-  - **Topic menu panel:** List of help topics appropriate to user role
-  - **Content panel:** Detailed help content with screenshots and step-by-step instructions
-  - **Breadcrumb navigation:** Shows current help topic location
-  - **Search functionality:** Text input for searching help content
-  - **"Return to [Previous Page]" button:** Context-aware return navigation
-
-**Context-sensitive help:**
-- Opens to specific help topic based on current screen
-- Highlights relevant sections for current user role
-- Provides direct links to related functions
-
 ## 9. Business Rules and Validation
 
-| Rule ID | Rule Description                               | Applies To                                         | Validation Behaviour                                                          |
-| ------- | ---------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------- |
-| BR-001  | Login authentication is mandatory for all system access | All system entry points | If not authenticated, redirect to login page; if credentials invalid, show error message |
-| BR-002  | Users must have valid BST permissions configured in database | User access validation | Check user table for valid record; if not found, redirect to access denied page |
-| BR-003  | User role determines available navigation functions | Home page navigation dropdowns | Filter dropdown menu items based on user role; hide restricted functions |
-| BR-004  | Screen-level permissions control data modification capabilities | Individual screen access | Query data_entry for screen permissions; disable controls if can_write is "S" (restricted) |
-| BR-005  | All authentication and access events must be logged | Authentication and authorisation processes | Create audit log entry for every login, logout, access grant, and access denial |
-| BR-006  | User context must be maintained consistently across all screens | Session management | Display user name, role, and location consistently; track identity for audit logging |
-| BR-007  | Session activity must be tracked for audit compliance | All user interactions | Update last activity timestamp and log significant user actions |
-| BR-008  | Role-specific help content must be displayed | Help system access | Filter help topics and content based on user role permissions |
-| BR-009  | System announcements are displayed to all authenticated users | Home page display | Show current announcements to all users regardless of role |
+| Rule ID | Rule Description                                                | Applies To                               | Validation Behaviour                                                                     |
+| ------- | --------------------------------------------------------------- | ---------------------------------------- | ---------------------------------------------------------------------------------------- |
+| BR-001  | Login authentication is mandatory for all system access         | All system entry points                  | If not authenticated, redirect to login page; if credentials invalid, show error message  |
+| BR-002  | Users must have valid BST permissions configured in database    | User access validation                   | Check user table for valid record; if not found, redirect to access denied page           |
+| BR-003  | User role determines available navigation functions             | Home page navigation dropdowns           | Filter dropdown menu items based on user role; hide restricted functions                  |
+| BR-004  | All authentication and access events must be logged             | Authentication and authorisation processes | Create audit log entry for every login, logout, access grant, and access denial          |
+| BR-005  | User context must be maintained consistently across all screens | Session management                       | Display user name, role, and location consistently; track identity for audit logging      |
+| BR-006  | Session activity must be tracked for audit compliance           | All user interactions                    | Update last activity timestamp and log significant user actions                           |
 
 ## 10. Data Model and Requirements
 
 ### Entities
 
-| Entity | Key Attributes | Description |
-|--------|---------------|-------------|
-| user | user_id, user_name, user_location, user_level | System user with role-based access permissions |
-| apha_location | location_id, location_name, is_ahvla | APHA facility or organisational unit |
-| audit_log | log_id, user_id, timestamp, event_type, details, ip_address | System audit trail for security and compliance |
-| data_entry | screen_name, user_id, can_write | Screen-level permissions for Data Entry users |
+| Entity        | Key Attributes                                            | Description                                                |
+|---------------|-----------------------------------------------------------|------------------------------------------------------------|
+| user          | user_id, user_name, user_location, user_level             | System user with role-based access permissions             |
+| apha_location | location_id, location_name, is_ahvla                     | APHA facility or organisational unit                       |
+| audit_log     | log_id, user_id, timestamp, event_type, details, ip_address | System audit trail for security and compliance           |
 
 ### Search Parameters
 
@@ -731,86 +536,82 @@ No search functionality is implemented within the authentication and navigation 
 
 - **user → apha_location:** Many-to-one relationship where each user is assigned to one APHA location
 - **user → audit_log:** One-to-many relationship where each user can have multiple audit log entries
-- **user → data_entry:** One-to-many relationship where each Data Entry user has multiple screen-level permissions configured
 - **apha_location:** Referenced by multiple entities across the system for location-based filtering and reporting
 
 ## 11. Integration Points and External Dependencies
 
-| System | Integration Type | Direction | Description | Criticality |
-|--------|-----------------|-----------|-------------|-------------|
-| Database | Database connection | Bidirectional | User credential validation, permission validation, audit logging, and session management data storage | Required |
+| System   | Integration Type    | Direction     | Description                                                                               | Criticality |
+|----------|--------------------| --------------|-------------------------------------------------------------------------------------------|-------------|
+| Database | Database connection | Bidirectional | User credential validation, permission validation, audit logging, and session management  | Required    |
 
 ## 12. Non-Functional Requirements
 
-| NFR ID  | Category                                                                    | Requirement                | Acceptance Threshold                       |
-| ------- | --------------------------------------------------------------------------- | -------------------------- | ------------------------------------------ |
-| NFR-001 | Usability | Login form should be simple and responsive | User can log in with username and password in a single step |
-| NFR-002 | Performance | Home page load time | Page loads within 3 seconds for typical user scenarios |
-| NFR-003 | Security | Session management | User sessions maintain security context and track activity |
-| NFR-004 | Audit | Authentication event logging | All login/logout events logged with complete user context |
-| NFR-006 | Accessibility | Screen reader compatibility | Navigation structure accessible via keyboard and screen readers |
-| NFR-007 | Compliance | Audit trail retention | Authentication and access logs retained in the database; no specific retention period enforced for POC |
-| NFR-008 | Security | Unauthorised access response | Access denials processed and logged within 2 seconds |
+| NFR ID  | Category      | Requirement                      | Acceptance Threshold                                                                          |
+| ------- | ------------- | -------------------------------- | --------------------------------------------------------------------------------------------- |
+| NFR-001 | Usability     | Login form should be simple and responsive | User can log in with username and password in a single step                           |
+| NFR-002 | Performance   | Home page load time              | Page loads within 3 seconds for typical user scenarios                                        |
+| NFR-003 | Security      | Session management               | User sessions maintain security context and track activity                                    |
+| NFR-004 | Audit         | Authentication event logging     | All login/logout events logged with complete user context                                     |
+| NFR-005 | Accessibility | Screen reader compatibility      | Navigation structure accessible via keyboard and screen readers                               |
+| NFR-006 | Compliance    | Audit trail retention            | Authentication and access logs retained in the database; no specific retention period for POC  |
+| NFR-007 | Security      | Unauthorised access response     | Access denials processed and logged within 2 seconds                                          |
 
 ## 13. Internal System Dependencies
 
-| Dependency | Type | Description | Impact if Unavailable |
-|------------|------|-------------|----------------------|
-| Database | Blocks | User credential validation, permission validation, audit logging, and session data storage | Complete system failure - no user access possible |
-| Session State Management | Enhances | User context tracking across requests | Degraded experience - user context may be lost between screens |
+| Dependency               | Type     | Description                                                                          | Impact if Unavailable                                              |
+|--------------------------|----------|--------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| Database                 | Blocks   | User credential validation, permission validation, audit logging, and session data   | Complete system failure - no user access possible                  |
+| Session State Management | Enhances | User context tracking across requests                                                | Degraded experience - user context may be lost between screens     |
 
 ## 14. Business Dependencies
 
-| Dependency                                                        | Owner                        | Description              | Status                             |
-| ----------------------------------------------------------------- | ---------------------------- | ------------------------ | ---------------------------------- |
-| Database user credentials and permissions setup | Database Administrator | User credential and permission records must be configured in BST database user and data_entry tables | Pending |
-| Help content creation | Business Analyst | System help documentation must be written and reviewed | Pending |
+| Dependency                                       | Owner                  | Description                                                                          | Status  |
+|--------------------------------------------------|------------------------|--------------------------------------------------------------------------------------|---------|
+| Database user credentials and permissions setup  | Database Administrator | User credential and permission records must be configured in BST database user table | Pending |
 
 ## 15. Key Assumptions
 
-| # | Assumption | Risk if Invalid |
-|---|-----------|-----------------|
-| 1 | User credentials are stored in the BST database for POC purposes | Production deployment would require migration to an enterprise identity provider |
-| 2 | User permission data model supports the required role-based access patterns | Would require redesign of permission model and user interface |
-| 3 | Help content can be maintained by business users rather than technical staff | Would require ongoing technical resources for help system updates |
+| # | Assumption                                                                       | Risk if Invalid                                                                    |
+|---|----------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| 1 | User credentials are stored in the BST database for POC purposes                | Production deployment would require migration to an enterprise identity provider   |
+| 2 | User permission data model supports the required role-based access patterns      | Would require redesign of permission model and user interface                      |
 
 ## 16. Success Metrics and KPIs
 
-| Metric                                        | Target                                | Measurement Method          |
-| --------------------------------------------- | ----------------------------- | --------------------------- |
-| Authentication time | Under 2 seconds for login submission | Page load time measurement |
-| Home page load time | Under 3 seconds | Browser performance monitoring |
-| Unauthorised access incidents | 100% logged | Audit log analysis |
-| User navigation efficiency | Maximum 3 clicks to reach any function | User interaction tracking |
-| Security incident response time | Unauthorised access logged in audit trail | Audit log review |
+| Metric                          | Target                                          | Measurement Method              |
+|---------------------------------|-------------------------------------------------|---------------------------------|
+| Authentication time             | Under 2 seconds for login submission            | Page load time measurement      |
+| Home page load time             | Under 3 seconds                                 | Browser performance monitoring  |
+| Unauthorised access incidents   | 100% logged                                     | Audit log analysis              |
+| User navigation efficiency      | Maximum 3 clicks to reach any function          | User interaction tracking       |
+| Security incident response time | Unauthorised access logged in audit trail        | Audit log review                |
 
 ## 17. Effort Estimate
 
-| Dimension        | Estimate       | Assumptions                                |
-| ---------------- | -------------- | ------------------------------------------ |
-| **Human Effort** | 15 person-days | Assumes straightforward database integration, standard web development patterns, and minimal custom security components required (POC uses naive login) |
+| Dimension        | Estimate       | Assumptions                                                                                                                          |
+| ---------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Human Effort** | 10 person-days | Assumes straightforward database integration, standard web development patterns, and minimal custom security components (POC login)  |
 
 ## 18. Definition of Done
 
 This feature is considered done when all of the following are satisfied:
 
-- [ ] All user stories in User Stories and Acceptance Criteria are implemented and pass their acceptance criteria
+- [ ] All user stories are implemented and pass their acceptance criteria
 - [ ] All test scenarios have been met
 - [ ] UI implementations match the specifications in UI/Layout Specifications
-- [ ] All business rules in Business Rules and Validation are enforced and validated
-- [ ] All data model requirements in Data Model and Requirements are implemented
-- [ ] All integration points in Integration Points and External Dependencies are connected and functional
-- [ ] All non-functional requirements in Non-Functional Requirements meet their acceptance thresholds
+- [ ] All business rules are enforced and validated
+- [ ] All data model requirements are implemented
+- [ ] All integration points are connected and functional
+- [ ] All non-functional requirements meet their acceptance thresholds
 - [ ] Feature has been reviewed and accepted by the product owner
 - [ ] Feature has been demonstrated to stakeholders
 
 ## 19. Glossary
 
-| Term | Definition |
-|------|-----------|
-| **Naive login** | POC authentication mechanism using a simple username/password form validated against the database; would be replaced with an enterprise identity provider for production |
-| **Role-based access control** | Security model where system access and functionality is determined by predefined user roles (Supervisor, Data Entry, Read-Only) |
-| **Application shell** | The foundational user interface framework that provides consistent navigation, layout, and user context across all system screens |
-| **Session management** | System capability to maintain user identity and context across multiple page requests during a single usage session |
-| **Audit logging** | Automatic recording of user actions, system events, and security-relevant activities for compliance and security monitoring |
-| **Screen-level permissions** | Fine-grained access controls that determine whether specific screens or functions are editable by Data Entry users |
+| Term                          | Definition                                                                                                                                    |
+|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| **Naive login**               | POC authentication mechanism using a simple username/password form validated against the database; would be replaced with an enterprise identity provider for production |
+| **Role-based access control** | Security model where system access and functionality is determined by predefined user roles (Supervisor, Data Entry, Read-Only)               |
+| **Application shell**         | The foundational user interface framework that provides consistent navigation, layout, and user context across all system screens             |
+| **Session management**        | System capability to maintain user identity and context across multiple page requests during a single usage session                           |
+| **Audit logging**             | Automatic recording of user actions, system events, and security-relevant activities for compliance and security monitoring                   |
