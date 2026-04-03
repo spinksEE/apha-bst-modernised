@@ -28,6 +28,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     locationName?: string;
     sessionId: string;
   }): Promise<AuthenticatedUser> {
+    const secret = this.configService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT secret not configured');
+    }
+
     return this.authService.validateUser({
       userId: payload.sub,
       name: payload.name,

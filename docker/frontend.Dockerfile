@@ -21,6 +21,7 @@ RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY apps/frontend/ apps/frontend/
+RUN touch /workspace/apps/frontend/src/hooks/useSessionBootstrap.ts
 COPY packages/shared/ packages/shared/
 
 EXPOSE 3000

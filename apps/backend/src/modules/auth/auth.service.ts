@@ -230,7 +230,4 @@ export class AuthService {
     return bcrypt.hash(password, rounds);
   }
 
-  private generateReferenceId(): string {
-    return generateReferenceId();
-  }
 }

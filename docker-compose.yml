@@ -35,6 +35,9 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-apha_bst}?schema=public
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
+      JWT_ISSUER: ${JWT_ISSUER:-apha-bst}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-apha-bst-users}
     ports:
       - "3001:3001"
     depends_on:
