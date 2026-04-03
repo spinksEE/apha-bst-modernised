@@ -7,7 +7,9 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
+import { AuditSeverity } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
 import type { AuthAccessResult, AuthenticatedUser } from './auth.types';
 
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid username or password';
@@ -21,6 +23,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   async login(
@@ -40,21 +43,58 @@ export class AuthService {
     });
 
     if (!user) {
+      await this.auditLogService.logEvent({
+        eventType: 'AUTH_LOGIN_FAILURE',
+        ipAddress,
+        details: {
+          reason: 'USER_NOT_FOUND',
+          username: normalizedUsername,
+        },
+      });
       throw new UnauthorizedException({ message: INVALID_CREDENTIALS_MESSAGE });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
+      await this.auditLogService.logEvent({
+        eventType: 'AUTH_LOGIN_FAILURE',
+        userId: user.id,
+        ipAddress,
+        details: {
+          reason: 'INVALID_PASSWORD',
+          username: normalizedUsername,
+        },
+      });
       throw new UnauthorizedException({ message: INVALID_CREDENTIALS_MESSAGE });
     }
 
     if (!user.isActive) {
       const referenceId = this.generateReferenceId();
+      await this.auditLogService.logEvent({
+        eventType: 'ACCESS_DENIED',
+        severity: AuditSeverity.High,
+        userId: user.id,
+        ipAddress,
+        details: {
+          reason: 'USER_INACTIVE',
+          referenceId,
+        },
+      });
       throw new ForbiddenException({ message: ACCESS_DENIED_MESSAGE, referenceId });
     }
 
     if (!user.role || !user.locationId) {
       const referenceId = this.generateReferenceId();
+      await this.auditLogService.logEvent({
+        eventType: 'ACCESS_DENIED',
+        severity: AuditSeverity.High,
+        userId: user.id,
+        ipAddress,
+        details: {
+          reason: 'MISSING_ROLE_OR_LOCATION',
+          referenceId,
+        },
+      });
       throw new ForbiddenException({ message: ACCESS_DENIED_MESSAGE, referenceId });
     }
 
@@ -81,6 +121,17 @@ export class AuthService {
       data: { lastActivityAt: new Date() },
     });
 
+    await this.auditLogService.logEvent({
+      eventType: 'AUTH_LOGIN_SUCCESS',
+      userId: user.id,
+      ipAddress,
+      sessionId,
+      details: {
+        role: user.role,
+        locationId: user.locationId,
+      },
+    });
+
     return {
       accessToken: token,
       userContext: {
@@ -100,16 +151,46 @@ export class AuthService {
     });
 
     if (!user) {
+      await this.auditLogService.logEvent({
+        eventType: 'ACCESS_DENIED',
+        severity: AuditSeverity.High,
+        userId: payload.userId,
+        sessionId: payload.sessionId,
+        details: {
+          reason: 'USER_NOT_FOUND',
+          referenceId: this.generateReferenceId(),
+        },
+      });
       throw new UnauthorizedException({ message: INVALID_CREDENTIALS_MESSAGE });
     }
 
     if (!user.isActive) {
       const referenceId = this.generateReferenceId();
+      await this.auditLogService.logEvent({
+        eventType: 'ACCESS_DENIED',
+        severity: AuditSeverity.High,
+        userId: user.id,
+        sessionId: payload.sessionId,
+        details: {
+          reason: 'USER_INACTIVE',
+          referenceId,
+        },
+      });
       throw new ForbiddenException({ message: ACCESS_DENIED_MESSAGE, referenceId });
     }
 
     if (!user.role || !user.locationId) {
       const referenceId = this.generateReferenceId();
+      await this.auditLogService.logEvent({
+        eventType: 'ACCESS_DENIED',
+        severity: AuditSeverity.High,
+        userId: user.id,
+        sessionId: payload.sessionId,
+        details: {
+          reason: 'MISSING_ROLE_OR_LOCATION',
+          referenceId,
+        },
+      });
       throw new ForbiddenException({ message: ACCESS_DENIED_MESSAGE, referenceId });
     }
 
@@ -126,6 +207,19 @@ export class AuthService {
       locationName: user.location?.name ?? undefined,
       sessionId: payload.sessionId,
     };
+  }
+
+  async logout(user: AuthenticatedUser, ipAddress?: string): Promise<void> {
+    await this.auditLogService.logEvent({
+      eventType: 'AUTH_LOGOUT',
+      userId: user.userId,
+      ipAddress,
+      sessionId: user.sessionId,
+      details: {
+        role: user.role,
+        locationId: user.locationId,
+      },
+    });
   }
 
   async hashPassword(password: string): Promise<string> {
