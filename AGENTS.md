@@ -9,7 +9,7 @@ APHA Brainstem Training Schedule (BST) — a modernised web app for the Animal a
 pnpm run dev
 
 # Rebuild and start
-docker-compose up --build
+docker compose up --build
 
 # Stop (keeps data) / stop and wipe
 pnpm run stop
@@ -20,14 +20,14 @@ All test and lint commands run inside Docker containers:
 
 ```bash
 # Backend
-docker-compose exec backend pnpm test          # unit tests
-docker-compose exec backend pnpm test:e2e      # e2e tests
-docker-compose exec backend pnpm lint
+docker compose exec backend pnpm test          # unit tests
+docker compose exec backend pnpm test:e2e      # e2e tests
+docker compose exec backend pnpm lint
 
 # Frontend
-docker-compose exec frontend pnpm test         # unit tests
-docker-compose exec frontend pnpm exec playwright test  # acceptance tests
-docker-compose exec frontend pnpm type-check
+docker compose exec frontend pnpm test         # unit tests
+docker compose exec frontend pnpm exec playwright test  # acceptance tests
+docker compose exec frontend pnpm type-check
 
 # Browser verification (from host, not Docker — see rules/acceptance-testing.md)
 dev-browser --headless                                   # AI agent visual check
@@ -78,10 +78,10 @@ pnpm run prisma:studio        # visual editor at localhost:5555
 
 - All commands run inside Docker — don't run `pnpm test` on the host
 - Postgres must pass its health check before the backend starts (handled by `depends_on`)
-- Hot reload sometimes stalls — `docker-compose up --build` to fix
+- Hot reload sometimes stalls — `docker compose up --build` to fix
 - Hot reload not working in Docker → add `usePolling: true` to Vite `server.watch` config
 - Migrations auto-apply on container start via `prisma migrate deploy`
-- `docker-compose down -v` deletes all data — use `pnpm run stop` to preserve it
+- `docker compose down -v` deletes all data — use `pnpm run stop` to preserve it
 - Port already in use → `lsof -i :<port>` to identify the process
 - Database migrations failed → `prisma migrate reset` or `prisma migrate resolve --applied <name>`
 - Environment variables not loaded → restart containers after `.env` changes
