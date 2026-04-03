@@ -1,8 +1,8 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HealthPage } from './HealthPage';
 import type { HealthResponse } from '../types/health';
+import { renderWithProviders } from '../test-utils';
 
 vi.mock('../api/health');
 
@@ -10,16 +10,7 @@ import { fetchHealth } from '../api/health';
 
 const mockedFetchHealth = vi.mocked(fetchHealth);
 
-function renderWithProviders(ui: React.ReactElement) {
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-    },
-  });
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
-  );
-}
+const renderHealthPage = () => renderWithProviders(<HealthPage />);
 
 describe('HealthPage', () => {
   beforeEach(() => {
@@ -34,7 +25,7 @@ describe('HealthPage', () => {
     };
     mockedFetchHealth.mockResolvedValue(healthy);
 
-    renderWithProviders(<HealthPage />);
+    renderHealthPage();
 
     await waitFor(() => {
       expect(screen.getByTestId('health-response')).toBeInTheDocument();
@@ -56,7 +47,7 @@ describe('HealthPage', () => {
     };
     mockedFetchHealth.mockResolvedValue(unhealthy);
 
-    renderWithProviders(<HealthPage />);
+    renderHealthPage();
 
     await waitFor(() => {
       expect(screen.getByTestId('health-response')).toBeInTheDocument();
@@ -72,7 +63,7 @@ describe('HealthPage', () => {
   it('renders error state when backend is unreachable', async () => {
     mockedFetchHealth.mockRejectedValue(new Error('Network Error'));
 
-    renderWithProviders(<HealthPage />);
+    renderHealthPage();
 
     await waitFor(() => {
       expect(screen.getByTestId('health-response')).toBeInTheDocument();
