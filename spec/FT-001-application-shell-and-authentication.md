@@ -63,7 +63,7 @@ All users require authentication and navigation capabilities to access any syste
 
 ### Out of Scope
 
-- News system functionality — marked as unused and redundant in legacy analysis
+- News system functionality — not required
 - Detailed business function implementations — covered by downstream features FT-002 through FT-006
 - Complex reporting functionality — covered by separate reporting feature
 - Database user management interfaces — handled by System Administrator outside application
@@ -766,7 +766,7 @@ No search functionality is implemented within the authentication and navigation 
 
 | System | Integration Type | Direction | Description | Criticality |
 |--------|-----------------|-----------|-------------|-------------|
-| SQL Server Database | Database connection | Bidirectional | User credential validation, permission validation, audit logging, and session management data storage | Required |
+| Database | Database connection | Bidirectional | User credential validation, permission validation, audit logging, and session management data storage | Required |
 
 ## 12. Non-Functional Requirements
 
@@ -785,7 +785,7 @@ No search functionality is implemented within the authentication and navigation 
 
 | Dependency | Type | Description | Impact if Unavailable |
 |------------|------|-------------|----------------------|
-| SQL Server Database | Blocks | User credential validation, permission validation, audit logging, and session data storage | Complete system failure - no user access possible |
+| Database | Blocks | User credential validation, permission validation, audit logging, and session data storage | Complete system failure - no user access possible |
 | Session State Management | Enhances | User context tracking across requests | Degraded experience - user context may be lost between screens |
 
 ## 14. Business Dependencies
@@ -800,20 +800,18 @@ No search functionality is implemented within the authentication and navigation 
 | # | Assumption | Risk if Invalid |
 |---|-----------|-----------------|
 | 1 | User credentials are stored in the BST database for POC purposes | Production deployment would require migration to an enterprise identity provider |
-| 3 | User permission data can be migrated accurately from legacy system database | Would require manual reconfiguration of all user access rights |
-| 4 | Business requirements for role-based access remain consistent with legacy system | Would require redesign of permission model and user interface |
+| 3 | User permission data model supports the required role-based access patterns | Would require redesign of permission model and user interface |
 | 5 | Help content can be maintained by business users rather than technical staff | Would require ongoing technical resources for help system updates |
 
 ## 16. Success Metrics and KPIs
 
-| Metric                                        | Baseline (Legacy)                      | Target (New System)           | Measurement Method          |
-| --------------------------------------------- | -------------------------------------- | ----------------------------- | --------------------------- |
-| Authentication time | N/A (manual assessment) | Under 2 seconds for login submission | Page load time measurement |
-| Home page load time | N/A (not measured) | Under 3 seconds | Browser performance monitoring |
-| Unauthorised access incidents | Unknown (not tracked) | 100% logged and alerted | Audit log analysis |
-| User navigation efficiency | Unknown (not measured) | Maximum 3 clicks to reach any function | User interaction tracking |
-| Authentication-related support calls | Unknown baseline | Reduce through simple login flow | Support ticket analysis |
-| Security incident response time | Manual notification only | Unauthorised access logged in audit trail | Audit log review |
+| Metric                                        | Target                                | Measurement Method          |
+| --------------------------------------------- | ----------------------------- | --------------------------- |
+| Authentication time | Under 2 seconds for login submission | Page load time measurement |
+| Home page load time | Under 3 seconds | Browser performance monitoring |
+| Unauthorised access incidents | 100% logged | Audit log analysis |
+| User navigation efficiency | Maximum 3 clicks to reach any function | User interaction tracking |
+| Security incident response time | Unauthorised access logged in audit trail | Audit log review |
 
 ## 17. Effort Estimate
 
@@ -825,9 +823,9 @@ No search functionality is implemented within the authentication and navigation 
 
 | # | Question | Context | Impact | Raised By | Status |
 |---|----------|---------|--------|-----------|--------|
-| 1 | Should the unused news system functionality be completely removed or maintained for potential future use? | Legacy analysis shows news functionality is present but deprecated | Interface complexity and maintenance overhead | Agent | Open |
+| 1 | Should news/announcements functionality be included? | Currently scoped as system announcements on home page | Interface complexity and maintenance overhead | Agent | Open |
 | 2 | What are the specific screen-level permission values in tblDataEntry table and how do they map to user interface behaviour? | BR-004 references CanWrite values but PRD doesn't specify the complete permission model | Cannot fully define Data Entry user interface restrictions | Agent | Open |
-| 3 | What is the desired session timeout duration and warning period for idle users? | Legacy system has no timeout controls which creates security risk | Security policy compliance and user experience balance | Agent | Open |
+| 3 | What is the desired session timeout duration and warning period for idle users? | No timeout controls creates security risk | Security policy compliance and user experience balance | Agent | Open |
 | 4 | Are there specific corporate branding or visual design standards that must be applied to authentication and navigation interfaces? | PRD content focuses on functional requirements without visual design guidance | User interface consistency and corporate compliance | Agent | Open |
 
 ## 19. Definition of Done
