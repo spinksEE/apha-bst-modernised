@@ -11,6 +11,7 @@ import { AuditSeverity } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import type { AuthAccessResult, AuthenticatedUser } from './auth.types';
+import { generateReferenceId } from './auth.reference';
 
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid username or password';
 const ACCESS_DENIED_MESSAGE = 'Access denied';
@@ -69,7 +70,7 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      const referenceId = this.generateReferenceId();
+      const referenceId = generateReferenceId();
       await this.auditLogService.logEvent({
         eventType: 'ACCESS_DENIED',
         severity: AuditSeverity.High,
@@ -84,7 +85,7 @@ export class AuthService {
     }
 
     if (!user.role || !user.locationId) {
-      const referenceId = this.generateReferenceId();
+      const referenceId = generateReferenceId();
       await this.auditLogService.logEvent({
         eventType: 'ACCESS_DENIED',
         severity: AuditSeverity.High,
@@ -158,14 +159,14 @@ export class AuthService {
         sessionId: payload.sessionId,
         details: {
           reason: 'USER_NOT_FOUND',
-          referenceId: this.generateReferenceId(),
+          referenceId: generateReferenceId(),
         },
       });
       throw new UnauthorizedException({ message: INVALID_CREDENTIALS_MESSAGE });
     }
 
     if (!user.isActive) {
-      const referenceId = this.generateReferenceId();
+      const referenceId = generateReferenceId();
       await this.auditLogService.logEvent({
         eventType: 'ACCESS_DENIED',
         severity: AuditSeverity.High,
@@ -180,7 +181,7 @@ export class AuthService {
     }
 
     if (!user.role || !user.locationId) {
-      const referenceId = this.generateReferenceId();
+      const referenceId = generateReferenceId();
       await this.auditLogService.logEvent({
         eventType: 'ACCESS_DENIED',
         severity: AuditSeverity.High,
@@ -230,14 +231,6 @@ export class AuthService {
   }
 
   private generateReferenceId(): string {
-    const now = new Date();
-    const date = `${now.getUTCFullYear()}${String(now.getUTCMonth() + 1).padStart(2, '0')}${String(
-      now.getUTCDate(),
-    ).padStart(2, '0')}`;
-    const time = `${String(now.getUTCHours()).padStart(2, '0')}${String(
-      now.getUTCMinutes(),
-    ).padStart(2, '0')}`;
-    const suffix = crypto.randomInt(100, 999);
-    return `UA-${date}-${time}-${suffix}`;
+    return generateReferenceId();
   }
 }
