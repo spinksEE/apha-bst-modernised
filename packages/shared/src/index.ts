@@ -1,2 +1,1 @@
-// Shared types barrel export
-export {};
+export * from "./auth";
