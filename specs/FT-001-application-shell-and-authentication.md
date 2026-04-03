@@ -49,7 +49,6 @@ All users require authentication and navigation capabilities to access any syste
 
 ### In Scope
 
-- Windows Authentication integration with Active Directory
 - Home page serving as central navigation hub
 - Role-based access control system (Supervisor, Data Entry, Read-Only)
 - User session management and identity tracking
