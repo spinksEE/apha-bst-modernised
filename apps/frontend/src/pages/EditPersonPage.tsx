@@ -139,6 +139,16 @@ export function EditPersonPage(): React.JSX.Element {
     focusErrorSummary();
   }
 
+  const siteOptions = useMemo(
+    () =>
+      (sites ?? []).map((site) => (
+        <Combobox.Option value={site.plant_no} key={site.plant_no}>
+          {formatSiteOption(site)}
+        </Combobox.Option>
+      )),
+    [sites],
+  );
+
   if (isLoading) {
     return <Loader data-testid="edit-loading" aria-label="Loading person details" />;
   }
@@ -168,16 +178,6 @@ export function EditPersonPage(): React.JSX.Element {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
-
-  const siteOptions = useMemo(
-    () =>
-      (sites ?? []).map((site) => (
-        <Combobox.Option value={site.plant_no} key={site.plant_no}>
-          {formatSiteOption(site)}
-        </Combobox.Option>
-      )),
-    [sites],
-  );
 
   return (
     <div style={{ maxWidth: '680px' }}>

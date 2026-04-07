@@ -283,6 +283,6 @@ test.describe('US-004: Delete site', () => {
     // Search again — site should be gone
     await searchInput.clear();
     await searchInput.fill('VanishE2E');
-    await expect(page.getByText('No sites found')).toBeVisible();
+    await expect(page.getByText('No sites found', { exact: true })).toBeVisible();
   });
 });
