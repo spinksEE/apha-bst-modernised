@@ -28,9 +28,6 @@ docker-compose exec backend pnpm lint
 docker-compose exec frontend pnpm test         # unit tests
 docker-compose exec frontend pnpm exec playwright test  # acceptance tests
 docker-compose exec frontend pnpm type-check
-
-# Browser verification (from host, not Docker — see rules/acceptance-testing.md)
-dev-browser --headless                                   # AI agent visual check
 ```
 
 Database:

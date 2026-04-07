@@ -12,7 +12,6 @@ A modernised web application for the Animal and Plant Health Agency to manage tr
 | pnpm | 9.15+ | `npm install -g pnpm` |
 | Docker | 24+ | https://docs.docker.com/get-docker |
 | Docker Compose | 2.x+ | Included with Docker Desktop |
-| dev-browser | latest | `npm install -g dev-browser && dev-browser install` |
 
 ## Getting started
 
