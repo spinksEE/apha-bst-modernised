@@ -12,6 +12,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@apha-bst/shared": "workspace:*",
     "@mantine/core": "7",
     "@mantine/form": "7",
     "@mantine/hooks": "7",
