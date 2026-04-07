@@ -3,8 +3,8 @@
   "private": true,
   "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "dev": "docker-compose up --build",
-    "stop": "docker-compose stop",
-    "clean": "docker-compose down -v"
+    "dev": "docker compose up --build",
+    "stop": "docker compose stop",
+    "clean": "docker compose down -v"
   }
 }

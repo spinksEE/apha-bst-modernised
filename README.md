@@ -39,12 +39,12 @@ Once running:
 
 ```bash
 # Backend
-docker-compose exec backend pnpm test          # unit tests
-docker-compose exec backend pnpm test:e2e      # e2e tests
+docker compose exec backend pnpm test          # unit tests
+docker compose exec backend pnpm test:e2e      # e2e tests
 
 # Frontend
-docker-compose exec frontend pnpm test         # unit tests
-docker-compose exec frontend pnpm exec playwright test  # acceptance tests
+docker compose exec frontend pnpm test         # unit tests
+docker compose exec frontend pnpm exec playwright test  # acceptance tests
 ```
 
 ## Stopping
