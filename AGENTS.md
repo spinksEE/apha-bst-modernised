@@ -5,6 +5,9 @@ APHA Brainstem Training Schedule (BST) — a modernised web app for the Animal a
 ## Commands
 
 ```bash
+# Tear down the entire stack before each iteration
+docker compose down -v
+
 # Start all services (recommended)
 pnpm run dev
 
