@@ -11,7 +11,7 @@ import {
 import { useForm } from '@mantine/form';
 import { useCreateSite } from '../hooks/useSites';
 import type { CreateSiteRequest } from '@apha-bst/shared';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { AxiosError } from 'axios';
 
 interface ServerError {
@@ -23,6 +23,7 @@ export function RegisterSitePage(): React.JSX.Element {
   const navigate = useNavigate();
   const createSite = useCreateSite();
   const [serverErrors, setServerErrors] = useState<string[]>([]);
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<CreateSiteRequest>({
     initialValues: {
@@ -66,6 +67,12 @@ export function RegisterSitePage(): React.JSX.Element {
     },
   });
 
+  function focusErrorSummary() {
+    setTimeout(() => {
+      errorSummaryRef.current?.focus();
+    }, 0);
+  }
+
   function handleSubmit(values: CreateSiteRequest) {
     setServerErrors([]);
 
@@ -101,11 +108,17 @@ export function RegisterSitePage(): React.JSX.Element {
           }
 
           setServerErrors(messages);
+          focusErrorSummary();
         } else {
           setServerErrors(['An unexpected error occurred. Please try again.']);
+          focusErrorSummary();
         }
       },
     });
+  }
+
+  function handleValidationFailure() {
+    focusErrorSummary();
   }
 
   const allErrors = [
@@ -117,6 +130,15 @@ export function RegisterSitePage(): React.JSX.Element {
       .map((msg) => ({ field: '', message: msg })),
   ];
 
+  function handleErrorLinkClick(e: React.MouseEvent<HTMLAnchorElement>, fieldId: string) {
+    e.preventDefault();
+    const el = document.getElementById(fieldId);
+    if (el) {
+      el.focus();
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
   return (
     <div style={{ maxWidth: '680px' }}>
       <Title order={1} style={{ fontFamily: '"GDS Transport", arial, sans-serif', fontSize: '36px', fontWeight: 700, marginBottom: '30px' }}>
@@ -124,44 +146,76 @@ export function RegisterSitePage(): React.JSX.Element {
       </Title>
 
       {allErrors.length > 0 && form.isTouched() && (
-        <Alert
-          color="red"
-          title="There is a problem"
-          mb="lg"
-          styles={{
-            title: { fontWeight: 700 },
-            root: { borderLeft: '5px solid #d4351c' },
-          }}
+        <div
+          ref={errorSummaryRef}
           role="alert"
+          aria-labelledby="error-summary-title"
+          tabIndex={-1}
           data-testid="error-summary"
+          style={{
+            padding: '20px',
+            marginBottom: '30px',
+            border: '5px solid #d4351c',
+            outline: 'none',
+          }}
         >
-          <List size="sm">
+          <h2
+            id="error-summary-title"
+            style={{
+              fontFamily: '"GDS Transport", arial, sans-serif',
+              fontSize: '19px',
+              fontWeight: 700,
+              margin: '0 0 15px 0',
+              color: '#0b0c0c',
+            }}
+          >
+            There is a problem
+          </h2>
+          <ul style={{ margin: 0, padding: '0 0 0 20px', listStyleType: 'none' }}>
             {allErrors.map((err, i) => (
-              <List.Item key={i}>
+              <li key={i} style={{ marginBottom: '5px' }}>
                 {err.field ? (
-                  <a href={`#${err.field}`} style={{ color: '#d4351c' }}>
+                  <a
+                    href={`#${err.field}`}
+                    onClick={(e) => handleErrorLinkClick(e, err.field)}
+                    style={{
+                      color: '#d4351c',
+                      fontFamily: '"GDS Transport", arial, sans-serif',
+                      fontSize: '16px',
+                      fontWeight: 700,
+                    }}
+                  >
                     {err.message}
                   </a>
                 ) : (
-                  <span style={{ color: '#d4351c' }}>{err.message}</span>
+                  <span style={{ color: '#d4351c', fontFamily: '"GDS Transport", arial, sans-serif', fontSize: '16px', fontWeight: 700 }}>
+                    {err.message}
+                  </span>
                 )}
-              </List.Item>
+              </li>
             ))}
-          </List>
-        </Alert>
+          </ul>
+        </div>
       )}
 
-      <form onSubmit={form.onSubmit(handleSubmit)} noValidate>
+      <form onSubmit={form.onSubmit(handleSubmit, handleValidationFailure)} noValidate>
         <TextInput
           id="plant_no"
           label="Plant Number"
           description="A unique identifier, up to 11 alphanumeric characters"
           required
           maxLength={11}
+          aria-required="true"
+          aria-describedby={form.errors.plant_no ? 'plant_no-error' : undefined}
           error={form.errors.plant_no}
           {...form.getInputProps('plant_no')}
           mb="md"
           data-testid="plant-no-input"
+          styles={{
+            label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' },
+            input: { borderColor: form.errors.plant_no ? '#d4351c' : undefined, borderWidth: form.errors.plant_no ? '3px' : undefined },
+            error: { fontWeight: 700, color: '#d4351c' },
+          }}
         />
 
         <TextInput
@@ -169,10 +223,17 @@ export function RegisterSitePage(): React.JSX.Element {
           label="Site Name"
           required
           maxLength={50}
+          aria-required="true"
+          aria-describedby={form.errors.name ? 'name-error' : undefined}
           error={form.errors.name}
           {...form.getInputProps('name')}
           mb="md"
           data-testid="site-name-input"
+          styles={{
+            label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' },
+            input: { borderColor: form.errors.name ? '#d4351c' : undefined, borderWidth: form.errors.name ? '3px' : undefined },
+            error: { fontWeight: 700, color: '#d4351c' },
+          }}
         />
 
         <TextInput
@@ -181,6 +242,7 @@ export function RegisterSitePage(): React.JSX.Element {
           maxLength={50}
           {...form.getInputProps('address_line_1')}
           mb="md"
+          styles={{ label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' } }}
         />
 
         <TextInput
@@ -189,6 +251,7 @@ export function RegisterSitePage(): React.JSX.Element {
           maxLength={50}
           {...form.getInputProps('address_line_2')}
           mb="md"
+          styles={{ label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' } }}
         />
 
         <TextInput
@@ -197,6 +260,7 @@ export function RegisterSitePage(): React.JSX.Element {
           maxLength={50}
           {...form.getInputProps('address_town')}
           mb="md"
+          styles={{ label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' } }}
         />
 
         <TextInput
@@ -205,6 +269,7 @@ export function RegisterSitePage(): React.JSX.Element {
           maxLength={50}
           {...form.getInputProps('address_county')}
           mb="md"
+          styles={{ label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' } }}
         />
 
         <TextInput
@@ -213,6 +278,7 @@ export function RegisterSitePage(): React.JSX.Element {
           maxLength={50}
           {...form.getInputProps('address_post_code')}
           mb="md"
+          styles={{ label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' } }}
         />
 
         <TextInput
@@ -221,6 +287,7 @@ export function RegisterSitePage(): React.JSX.Element {
           maxLength={50}
           {...form.getInputProps('telephone')}
           mb="md"
+          styles={{ label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' } }}
         />
 
         <TextInput
@@ -229,6 +296,7 @@ export function RegisterSitePage(): React.JSX.Element {
           maxLength={50}
           {...form.getInputProps('fax')}
           mb="md"
+          styles={{ label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' } }}
         />
 
         <Checkbox
@@ -236,14 +304,27 @@ export function RegisterSitePage(): React.JSX.Element {
           label="This is an APHA site"
           {...form.getInputProps('is_apha_site', { type: 'checkbox' })}
           mb="xl"
+          styles={{ label: { fontFamily: '"GDS Transport", arial, sans-serif', fontSize: '16px' } }}
         />
 
         <Group>
           <Button
-            variant="outline"
-            color="gray"
+            variant="default"
             onClick={() => navigate('/sites')}
             data-testid="cancel-button"
+            styles={{
+              root: {
+                backgroundColor: '#f3f2f1',
+                color: '#0b0c0c',
+                border: 'none',
+                boxShadow: '0 2px 0 #929191',
+                fontFamily: '"GDS Transport", arial, sans-serif',
+                fontWeight: 700,
+                fontSize: '16px',
+                padding: '8px 16px',
+                minHeight: '40px',
+              },
+            }}
           >
             Cancel
           </Button>
@@ -251,6 +332,19 @@ export function RegisterSitePage(): React.JSX.Element {
             type="submit"
             loading={createSite.isPending}
             data-testid="save-button"
+            styles={{
+              root: {
+                backgroundColor: '#00703c',
+                color: '#ffffff',
+                border: 'none',
+                boxShadow: '0 2px 0 #002d18',
+                fontFamily: '"GDS Transport", arial, sans-serif',
+                fontWeight: 700,
+                fontSize: '16px',
+                padding: '8px 16px',
+                minHeight: '40px',
+              },
+            }}
           >
             Save Site
           </Button>

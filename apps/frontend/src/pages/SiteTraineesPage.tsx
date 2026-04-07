@@ -112,7 +112,10 @@ export function SiteTraineesPage(): React.JSX.Element {
           mb="lg"
           withCloseButton
           onClose={() => setDeleteError(null)}
-          styles={{ root: { borderLeft: '5px solid #d4351c' } }}
+          styles={{
+            root: { borderLeft: '5px solid #d4351c' },
+            title: { fontWeight: 700 },
+          }}
           role="alert"
           data-testid="delete-error"
         >
@@ -139,8 +142,13 @@ export function SiteTraineesPage(): React.JSX.Element {
               onClick={() => combobox.openDropdown()}
               onFocus={() => combobox.openDropdown()}
               onBlur={() => combobox.closeDropdown()}
-              rightSection={isSearching ? <Loader size={16} /> : null}
+              rightSection={isSearching ? <Loader size={16} aria-label="Searching sites" /> : null}
               data-testid="site-search-input"
+              aria-autocomplete="list"
+              autoComplete="off"
+              styles={{
+                label: { fontWeight: 700, fontSize: '16px', fontFamily: '"GDS Transport", arial, sans-serif' },
+              }}
             />
           </Combobox.Target>
 
@@ -163,10 +171,16 @@ export function SiteTraineesPage(): React.JSX.Element {
       {selectedPlantNo && (
         <>
           {isSiteLoading ? (
-            <Loader data-testid="site-loading" />
+            <Loader data-testid="site-loading" aria-label="Loading site details" />
           ) : selectedSite ? (
             <>
-              <Card withBorder mb="lg" data-testid="site-details-card">
+              <Card
+                withBorder
+                mb="lg"
+                data-testid="site-details-card"
+                component="section"
+                aria-label={`Details for ${selectedSite.name}`}
+              >
                 <Group justify="space-between" mb="md">
                   <Title
                     order={2}
@@ -180,15 +194,25 @@ export function SiteTraineesPage(): React.JSX.Element {
                   </Title>
                   <Group>
                     <Button
-                      variant="outline"
+                      variant="default"
                       size="sm"
                       onClick={() => navigate(`/sites/${selectedPlantNo}/edit`)}
                       data-testid="edit-site-button"
+                      styles={{
+                        root: {
+                          backgroundColor: '#f3f2f1',
+                          color: '#0b0c0c',
+                          border: 'none',
+                          boxShadow: '0 2px 0 #929191',
+                          fontFamily: '"GDS Transport", arial, sans-serif',
+                          fontWeight: 700,
+                        },
+                      }}
                     >
                       Edit
                     </Button>
                     <Button
-                      variant="outline"
+                      variant="filled"
                       color="red"
                       size="sm"
                       onClick={() => {
@@ -196,38 +220,48 @@ export function SiteTraineesPage(): React.JSX.Element {
                         setDeleteModalOpen(true);
                       }}
                       data-testid="delete-site-button"
+                      styles={{
+                        root: {
+                          backgroundColor: '#d4351c',
+                          color: '#ffffff',
+                          border: 'none',
+                          boxShadow: '0 2px 0 #8a220e',
+                          fontFamily: '"GDS Transport", arial, sans-serif',
+                          fontWeight: 700,
+                        },
+                      }}
                     >
                       Delete
                     </Button>
                   </Group>
                 </Group>
 
-                <Text size="sm" c="dimmed" mb="xs">
+                <Text size="sm" c="dimmed" mb="xs" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>
                   Plant Number: {selectedSite.plant_no}
                 </Text>
                 {selectedSite.address_line_1 && (
-                  <Text size="sm">{selectedSite.address_line_1}</Text>
+                  <Text size="sm" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>{selectedSite.address_line_1}</Text>
                 )}
                 {selectedSite.address_line_2 && (
-                  <Text size="sm">{selectedSite.address_line_2}</Text>
+                  <Text size="sm" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>{selectedSite.address_line_2}</Text>
                 )}
                 {(selectedSite.address_town || selectedSite.address_county) && (
-                  <Text size="sm">
+                  <Text size="sm" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>
                     {[selectedSite.address_town, selectedSite.address_county]
                       .filter(Boolean)
                       .join(', ')}
                   </Text>
                 )}
                 {selectedSite.address_post_code && (
-                  <Text size="sm">{selectedSite.address_post_code}</Text>
+                  <Text size="sm" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>{selectedSite.address_post_code}</Text>
                 )}
                 {selectedSite.telephone && (
-                  <Text size="sm">Tel: {selectedSite.telephone}</Text>
+                  <Text size="sm" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>Tel: {selectedSite.telephone}</Text>
                 )}
                 {selectedSite.fax && (
-                  <Text size="sm">Fax: {selectedSite.fax}</Text>
+                  <Text size="sm" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>Fax: {selectedSite.fax}</Text>
                 )}
-                <Text size="sm" mt="md" fw={700}>
+                <Text size="sm" mt="md" fw={700} style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>
                   Total Personnel: 0
                 </Text>
                 {/* TODO FT-002: Wire personnel count to Trainee data */}
@@ -248,15 +282,15 @@ export function SiteTraineesPage(): React.JSX.Element {
               <Table striped highlightOnHover withTableBorder data-testid="personnel-table">
                 <Table.Thead>
                   <Table.Tr>
-                    <Table.Th>Name</Table.Th>
-                    <Table.Th>Status</Table.Th>
-                    <Table.Th>Actions</Table.Th>
+                    <Table.Th scope="col">Name</Table.Th>
+                    <Table.Th scope="col">Status</Table.Th>
+                    <Table.Th scope="col">Actions</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
                   <Table.Tr>
                     <Table.Td colSpan={3}>
-                      <Text c="dimmed" ta="center" py="md" data-testid="no-trainees-message">
+                      <Text c="dimmed" ta="center" py="md" data-testid="no-trainees-message" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>
                         No trainees associated with this site.
                       </Text>
                     </Table.Td>
@@ -275,24 +309,51 @@ export function SiteTraineesPage(): React.JSX.Element {
         title="Confirm deletion"
         centered
         data-testid="delete-modal"
+        aria-labelledby="delete-modal-title"
+        styles={{
+          title: {
+            fontFamily: '"GDS Transport", arial, sans-serif',
+            fontWeight: 700,
+            fontSize: '24px',
+          },
+        }}
       >
-        <Text mb="lg">
+        <Text mb="lg" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>
           Are you sure you want to delete{' '}
           <strong>{selectedSite?.name ?? 'this site'}</strong>? This action
           cannot be undone.
         </Text>
         <Group justify="flex-end">
           <Button
-            variant="outline"
+            variant="default"
             onClick={() => setDeleteModalOpen(false)}
+            styles={{
+              root: {
+                backgroundColor: '#f3f2f1',
+                color: '#0b0c0c',
+                border: 'none',
+                boxShadow: '0 2px 0 #929191',
+                fontFamily: '"GDS Transport", arial, sans-serif',
+                fontWeight: 700,
+              },
+            }}
           >
             Cancel
           </Button>
           <Button
-            color="red"
             onClick={handleDelete}
             loading={deleteSiteMutation.isPending}
             data-testid="confirm-delete-button"
+            styles={{
+              root: {
+                backgroundColor: '#d4351c',
+                color: '#ffffff',
+                border: 'none',
+                boxShadow: '0 2px 0 #8a220e',
+                fontFamily: '"GDS Transport", arial, sans-serif',
+                fontWeight: 700,
+              },
+            }}
           >
             Delete site
           </Button>
