@@ -5,6 +5,9 @@
   "scripts": {
     "dev": "docker compose up --build",
     "stop": "docker compose stop",
-    "clean": "docker compose down -v"
+    "clean": "docker compose down -v",
+    "prisma:migrate": "docker compose exec backend pnpm exec prisma migrate deploy",
+    "prisma:seed": "docker compose exec backend pnpm run prisma:seed",
+    "prisma:studio": "docker compose exec backend pnpm exec prisma studio --port 5555"
   }
 }

@@ -31,4 +31,7 @@ EXPOSE 3001
 # ---------- development ----------
 FROM base AS development
 
-CMD ["pnpm", "--filter", "backend", "run", "start:dev"]
+COPY docker/backend-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+CMD ["/entrypoint.sh"]
