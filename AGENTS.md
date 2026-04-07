@@ -56,10 +56,13 @@ pnpm run prisma:studio        # visual editor at localhost:5555
 - rules/typescript-rules.md
 - rules/react-rules.md
 - rules/nestjs.md
-- rules/domain-driven-design.md
 - rules/vite.md
+- rules/domain-driven-design.md
 - rules/clean-code.md
 - rules/acceptance-testing.md
+- rules/architecture.md
+- rules/docker-setup.md
+- rules/gds-design-system.md
 
 ## Ports
 
