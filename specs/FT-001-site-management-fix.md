@@ -169,7 +169,66 @@ CMD ["/entrypoint.sh"]
 
 ---
 
-## 8. Definition of Done
+## 8. Investigation Findings (2026-04-07)
+
+The backend implementation is **correct** — migrations, seeding, and the API all work as expected. The issue is a mismatch between the verification steps in this spec and the actual frontend behaviour.
+
+### Backend: Working
+
+- Container logs confirm: migration applied, seed ran ("Seeding complete: 11 total sites in database"), NestJS started.
+- `GET /api/sites` returns all 11 sites.
+- `GET /api/sites/search?name=me` returns filtered results correctly.
+
+### Frontend: Search-only combobox — no pre-populated dropdown
+
+The `SiteTraineesPage` (`apps/frontend/src/pages/SiteTraineesPage.tsx`) uses a **search-as-you-type** combobox, not a pre-populated "Select Site" dropdown. The relevant chain:
+
+1. `searchValue` state starts as `''` (line 29).
+2. `debouncedSearch` is derived from `searchValue` with a 300 ms delay (line 30).
+3. The hook call passes `name: debouncedSearch || undefined` (line 39), so when the search box is empty, `name` is `undefined`.
+4. `useSearchSites` in `apps/frontend/src/hooks/useSites.ts` (line 27) sets `enabled: hasParams`, where `hasParams = Boolean(params.plant_no || params.name)`. With `name` as `undefined`, `hasParams` is `false` and **the query never fires**.
+5. Consequently, the dropdown is empty on page load. Sites only appear after the user types at least one character.
+
+### Spec verification step 4 is incorrect
+
+> "Navigate to `http://localhost:3000/sites` and confirm the 'Select Site' dropdown is populated with the 10 dev seed sites."
+
+This step assumes a pre-populated dropdown, but the frontend was built as a search autocomplete. The seeded data **is** in the database and **is** returned by the API — it is simply not displayed until the user initiates a search.
+
+### Options
+
+1. **Update the spec** — change verification step 4 to: type a search term (e.g. "a") and confirm sites appear in the autocomplete dropdown.
+2. **Update the frontend** — load all sites on mount (using the existing `useAllSites` hook / `GET /api/sites`) and display them in the dropdown before any search input. This would match the original spec expectation.
+
+### Acceptance tests: current state and gaps
+
+Playwright E2E tests exist at `apps/frontend/e2e/site-management.spec.ts` covering US-001 through US-004. These tests run against the **live Docker stack** (frontend :3000, backend :3001, PostgreSQL) and use Playwright's `APIRequestContext` to seed/clean data via the backend API. They do **not** stub the database — this is correct and must remain the case.
+
+However, several gaps exist:
+
+1. **Tests cannot run until this fix lands.** The Playwright tests depend on a working database schema (they `POST /api/sites` to seed). Without migrations applied, every seed call returns a 500. This fix unblocks them.
+
+2. **No test verifies that the dev seed data is visible.** The existing tests create their own ephemeral data and clean it up. There is no test that confirms the 10 dev seed sites (inserted by `prisma/seed.ts` at container startup) are queryable — which is the exact scenario that prompted this investigation.
+
+3. **No smoke test for the seeded initial state.** There should be at least one acceptance test that, without seeding its own data, queries the search endpoint or the UI and asserts that the dev seed sites are present. This validates the full startup pipeline: migration → seed → API → frontend.
+
+4. **Backend unit tests mock Prisma — this is fine for unit tests but is not a substitute.** The service and controller specs (`site.service.spec.ts`, `site.controller.spec.ts`) use `jest.fn()` stubs for `PrismaService`. These verify business logic in isolation. Acceptance tests must exercise the real database to catch issues like missing migrations, schema drift, and constraint violations that mocks cannot surface.
+
+### Recommended additions
+
+Add the following acceptance tests to `apps/frontend/e2e/site-management.spec.ts` (or a new `e2e/seed-smoke.spec.ts`):
+
+| Test | Purpose |
+| ---- | ------- |
+| **Seed smoke: dev sites are present** | Navigate to `/sites`, search for a known seed site (e.g. name containing "Meadow"), assert it appears in the dropdown. Validates the migration → seed → API → UI pipeline end-to-end. |
+| **Seed smoke: correct count** | Call `GET /api/sites` via Playwright request context and assert the response contains at least 10 sites (the dev seed count). Guards against seed regressions. |
+| **Idempotent restart** | (Optional, CI-only) After a `docker compose down -v && docker compose up`, repeat the above checks. Validates that the entrypoint is re-runnable. |
+
+**Key constraint:** Acceptance tests must **never** stub, mock, or replace the database. They run against the real PostgreSQL instance managed by Docker Compose. This is what distinguishes them from the backend unit tests and is the only way to catch infrastructure-level regressions like missing migrations.
+
+---
+
+## 9. Definition of Done
 
 - [ ] `prisma/migrations/<timestamp>_init_site_management/migration.sql` exists and is committed.
 - [ ] `docker/backend-entrypoint.sh` exists, is executable, and is committed.
@@ -179,4 +238,6 @@ CMD ["/entrypoint.sh"]
 - [ ] `apps/backend/package.json` has `prisma:seed` (dev) and `prisma:seed:perf` (10k) scripts.
 - [ ] `docker compose down -v && docker compose up --build` results in a healthy stack with 10 seed sites visible in the UI.
 - [ ] A new site can be registered successfully through the UI.
+- [ ] Acceptance tests exist that verify dev seed data is present via the UI and API (no DB stubs).
 - [ ] All existing unit and E2E tests continue to pass.
+- [ ] All new acceptance tests pass against the live Docker stack.
