@@ -38,6 +38,8 @@ describe('SiteService', () => {
       update: jest.Mock;
       delete: jest.Mock;
     };
+    person: { count: jest.Mock };
+    trainer: { count: jest.Mock };
   };
 
   beforeEach(async () => {
@@ -49,6 +51,8 @@ describe('SiteService', () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      person: { count: jest.fn().mockResolvedValue(0) },
+      trainer: { count: jest.fn().mockResolvedValue(0) },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -125,13 +129,17 @@ describe('SiteService', () => {
   });
 
   describe('findByPlantNo', () => {
-    it('returns a site when found', async () => {
-      const site = makeSite();
+    it('returns a site with personnel count when found', async () => {
+      const site = makeSite({ _count: { persons: 3 } });
       prisma.site.findUnique.mockResolvedValue(site);
 
       const result = await service.findByPlantNo('UK12345');
 
       expect(result).toEqual(site);
+      expect(prisma.site.findUnique).toHaveBeenCalledWith({
+        where: { plant_no: 'UK12345' },
+        include: { _count: { select: { persons: true } } },
+      });
     });
 
     it('throws NotFoundException when not found', async () => {
@@ -298,15 +306,45 @@ describe('SiteService', () => {
   });
 
   describe('deleteSite', () => {
-    it('deletes an existing site', async () => {
-      prisma.site.findUnique.mockResolvedValue(makeSite());
+    it('deletes an existing site with no linked personnel', async () => {
+      prisma.site.findUnique.mockResolvedValue(makeSite({ _count: { persons: 0 } }));
+      prisma.person.count.mockResolvedValue(0);
+      prisma.trainer.count.mockResolvedValue(0);
       prisma.site.delete.mockResolvedValue(makeSite());
 
       await service.deleteSite('UK12345');
 
+      expect(prisma.person.count).toHaveBeenCalledWith({ where: { site_id: 'UK12345' } });
+      expect(prisma.trainer.count).toHaveBeenCalledWith({ where: { location_id: 'UK12345' } });
       expect(prisma.site.delete).toHaveBeenCalledWith({
         where: { plant_no: 'UK12345' },
       });
+    });
+
+    it('throws ConflictException when site has linked persons (BR-008)', async () => {
+      prisma.site.findUnique.mockResolvedValue(makeSite({ _count: { persons: 2 } }));
+      prisma.person.count.mockResolvedValue(2);
+      prisma.trainer.count.mockResolvedValue(0);
+
+      await expect(service.deleteSite('UK12345')).rejects.toThrow(
+        new ConflictException(
+          'There are personnel from Test Abattoir Ltd. You can only delete a site with no trainees.',
+        ),
+      );
+      expect(prisma.site.delete).not.toHaveBeenCalled();
+    });
+
+    it('throws ConflictException when site has linked trainers (BR-008)', async () => {
+      prisma.site.findUnique.mockResolvedValue(makeSite({ _count: { persons: 0 } }));
+      prisma.person.count.mockResolvedValue(0);
+      prisma.trainer.count.mockResolvedValue(1);
+
+      await expect(service.deleteSite('UK12345')).rejects.toThrow(
+        new ConflictException(
+          'There are personnel from Test Abattoir Ltd. You can only delete a site with no trainees.',
+        ),
+      );
+      expect(prisma.site.delete).not.toHaveBeenCalled();
     });
 
     it('throws NotFoundException for non-existent site', async () => {

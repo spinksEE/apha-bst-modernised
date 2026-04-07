@@ -103,12 +103,15 @@ describe('SiteController', () => {
   });
 
   describe('GET /sites/:plantNo', () => {
-    it('returns site response DTO', async () => {
-      service.findByPlantNo.mockResolvedValue(makeSite());
+    it('returns site response DTO with personnel_count', async () => {
+      service.findByPlantNo.mockResolvedValue(
+        makeSite({ _count: { persons: 5 } }),
+      );
 
       const result = await controller.findOne('UK12345');
 
       expect(result.plant_no).toBe('UK12345');
+      expect(result.personnel_count).toBe(5);
       expect(result).not.toHaveProperty('created_at');
     });
 
