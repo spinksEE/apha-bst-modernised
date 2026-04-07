@@ -12,13 +12,20 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@mantine/core": "7",
+    "@mantine/form": "7",
+    "@mantine/hooks": "7",
     "@tanstack/react-query": "^5.62.0",
     "axios": "^1.7.9",
+    "postcss": "^8.5.8",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@types/react": "^18.3.12",
