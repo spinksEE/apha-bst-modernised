@@ -117,6 +117,32 @@ export function Layout(): React.JSX.Element {
                   View Sites
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/persons/add"
+                  style={{
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    fontFamily: '"GDS Transport", arial, sans-serif',
+                    fontSize: '16px',
+                  }}
+                >
+                  Add Person
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/trainers"
+                  style={{
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    fontFamily: '"GDS Transport", arial, sans-serif',
+                    fontSize: '16px',
+                  }}
+                >
+                  Manage Trainers
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>

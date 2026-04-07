@@ -18,6 +18,7 @@ import {
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { useAllSites, useSearchSites, useSite, useDeleteSite } from '../hooks/useSites';
+import { usePersonsBySite, useDeletePerson } from '../hooks/usePersons';
 import type { SiteListItem } from '@apha-bst/shared';
 
 export function SiteTraineesPage(): React.JSX.Element {
@@ -30,6 +31,9 @@ export function SiteTraineesPage(): React.JSX.Element {
   const [debouncedSearch] = useDebouncedValue(searchValue, 300);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletePersonModalOpen, setDeletePersonModalOpen] = useState(false);
+  const [personToDelete, setPersonToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [deletePersonError, setDeletePersonError] = useState<string | null>(null);
 
   const combobox = useCombobox({
     onDropdownClose: () => combobox.resetSelectedOption(),
@@ -42,7 +46,9 @@ export function SiteTraineesPage(): React.JSX.Element {
   const sites = debouncedSearch ? searchResults : allSites;
   const isSitesLoading = debouncedSearch ? isSearching : isLoadingAll;
   const { data: selectedSite, isLoading: isSiteLoading } = useSite(selectedPlantNo);
+  const { data: persons, isLoading: isPersonsLoading } = usePersonsBySite(selectedPlantNo);
   const deleteSiteMutation = useDeleteSite();
+  const deletePersonMutation = useDeletePerson();
 
   function formatSiteOption(site: SiteListItem): string {
     return `${site.name} (${site.plant_no})`;
@@ -79,6 +85,30 @@ export function SiteTraineesPage(): React.JSX.Element {
           );
         } else {
           setDeleteError('An unexpected error occurred. Please try again.');
+        }
+      },
+    });
+  }
+
+  function handleDeletePerson() {
+    if (!personToDelete) return;
+
+    setDeletePersonError(null);
+    deletePersonMutation.mutate(personToDelete.id, {
+      onSuccess: () => {
+        setDeletePersonModalOpen(false);
+        setPersonToDelete(null);
+      },
+      onError: (error) => {
+        const axiosError = error as { response?: { status: number; data?: { message: string } } };
+        if (axiosError.response?.status === 409) {
+          setDeletePersonModalOpen(false);
+          setDeletePersonError(
+            axiosError.response.data?.message ||
+            'Training records must be deleted before a person can be removed.',
+          );
+        } else {
+          setDeletePersonError('An unexpected error occurred. Please try again.');
         }
       },
     });
@@ -294,47 +324,195 @@ export function SiteTraineesPage(): React.JSX.Element {
                 {selectedSite.fax && (
                   <Text size="sm" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>Fax: {selectedSite.fax}</Text>
                 )}
-                <Text size="sm" mt="md" fw={700} style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>
-                  Total Personnel: 0
+                <Text size="sm" mt="md" fw={700} style={{ fontFamily: '"GDS Transport", arial, sans-serif' }} data-testid="personnel-count">
+                  Total Personnel: {selectedSite.personnel_count ?? persons?.length ?? 0}
                 </Text>
-                {/* TODO FT-002: Wire personnel count to Trainee data */}
               </Card>
 
-              <Title
-                order={3}
-                style={{
-                  fontFamily: '"GDS Transport", arial, sans-serif',
-                  fontSize: '19px',
-                  fontWeight: 700,
-                  marginBottom: '10px',
-                }}
-              >
-                Personnel
-              </Title>
+              {deletePersonError && (
+                <Alert
+                  color="red"
+                  title="Cannot delete person"
+                  mb="lg"
+                  withCloseButton
+                  onClose={() => setDeletePersonError(null)}
+                  styles={{
+                    root: { borderLeft: '5px solid #d4351c' },
+                    title: { fontWeight: 700 },
+                  }}
+                  role="alert"
+                  data-testid="delete-person-error"
+                >
+                  {deletePersonError}
+                </Alert>
+              )}
 
-              <Table striped highlightOnHover withTableBorder data-testid="personnel-table">
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th scope="col">Name</Table.Th>
-                    <Table.Th scope="col">Status</Table.Th>
-                    <Table.Th scope="col">Actions</Table.Th>
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  <Table.Tr>
-                    <Table.Td colSpan={3}>
-                      <Text c="dimmed" ta="center" py="md" data-testid="no-trainees-message" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>
-                        No trainees associated with this site.
-                      </Text>
-                    </Table.Td>
-                  </Table.Tr>
-                  {/* TODO FT-002: Wire personnel grid to Trainee data */}
-                </Table.Tbody>
-              </Table>
+              <Group justify="space-between" mb="sm">
+                <Title
+                  order={3}
+                  style={{
+                    fontFamily: '"GDS Transport", arial, sans-serif',
+                    fontSize: '19px',
+                    fontWeight: 700,
+                  }}
+                >
+                  Personnel
+                </Title>
+                <Button
+                  size="sm"
+                  onClick={() => navigate(`/persons/add?site_id=${selectedPlantNo}`)}
+                  data-testid="add-person-button"
+                  styles={{
+                    root: {
+                      backgroundColor: '#00703c',
+                      color: '#ffffff',
+                      border: 'none',
+                      boxShadow: '0 2px 0 #002d18',
+                      fontFamily: '"GDS Transport", arial, sans-serif',
+                      fontWeight: 700,
+                    },
+                  }}
+                >
+                  Add Person
+                </Button>
+              </Group>
+
+              {isPersonsLoading ? (
+                <Loader data-testid="persons-loading" aria-label="Loading personnel" />
+              ) : (
+                <Table striped highlightOnHover withTableBorder data-testid="personnel-table">
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th scope="col">Name</Table.Th>
+                      <Table.Th scope="col">Trained?</Table.Th>
+                      <Table.Th scope="col">Actions</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {(persons ?? []).length === 0 ? (
+                      <Table.Tr>
+                        <Table.Td colSpan={3}>
+                          <Text c="dimmed" ta="center" py="md" data-testid="no-trainees-message" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>
+                            No trainees associated with this site.
+                          </Text>
+                        </Table.Td>
+                      </Table.Tr>
+                    ) : (
+                      (persons ?? []).map((person) => (
+                        <Table.Tr key={person.person_id} data-testid={`person-row-${person.person_id}`}>
+                          <Table.Td>{person.display_name}</Table.Td>
+                          <Table.Td>{person.has_training ? 'Yes' : 'No'}</Table.Td>
+                          <Table.Td>
+                            <Group gap="xs">
+                              <Button
+                                variant="default"
+                                size="xs"
+                                onClick={() => navigate(`/persons/${person.person_id}/edit`)}
+                                data-testid={`edit-person-${person.person_id}`}
+                                styles={{
+                                  root: {
+                                    backgroundColor: '#f3f2f1',
+                                    color: '#0b0c0c',
+                                    border: 'none',
+                                    boxShadow: '0 2px 0 #929191',
+                                    fontFamily: '"GDS Transport", arial, sans-serif',
+                                    fontWeight: 700,
+                                  },
+                                }}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="filled"
+                                color="red"
+                                size="xs"
+                                onClick={() => {
+                                  setDeletePersonError(null);
+                                  setPersonToDelete({ id: person.person_id, name: person.display_name });
+                                  setDeletePersonModalOpen(true);
+                                }}
+                                data-testid={`delete-person-${person.person_id}`}
+                                styles={{
+                                  root: {
+                                    backgroundColor: '#d4351c',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    boxShadow: '0 2px 0 #8a220e',
+                                    fontFamily: '"GDS Transport", arial, sans-serif',
+                                    fontWeight: 700,
+                                  },
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            </Group>
+                          </Table.Td>
+                        </Table.Tr>
+                      ))
+                    )}
+                  </Table.Tbody>
+                </Table>
+              )}
             </>
           ) : null}
         </>
       )}
+
+      <Modal
+        opened={deletePersonModalOpen}
+        onClose={() => setDeletePersonModalOpen(false)}
+        title="Confirm deletion"
+        centered
+        data-testid="delete-person-modal"
+        styles={{
+          title: {
+            fontFamily: '"GDS Transport", arial, sans-serif',
+            fontWeight: 700,
+            fontSize: '24px',
+          },
+        }}
+      >
+        <Text mb="lg" style={{ fontFamily: '"GDS Transport", arial, sans-serif' }}>
+          Are you sure you want to delete{' '}
+          <strong>{personToDelete?.name ?? 'this person'}</strong>? This action
+          cannot be undone.
+        </Text>
+        <Group justify="flex-end">
+          <Button
+            variant="default"
+            onClick={() => setDeletePersonModalOpen(false)}
+            styles={{
+              root: {
+                backgroundColor: '#f3f2f1',
+                color: '#0b0c0c',
+                border: 'none',
+                boxShadow: '0 2px 0 #929191',
+                fontFamily: '"GDS Transport", arial, sans-serif',
+                fontWeight: 700,
+              },
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeletePerson}
+            loading={deletePersonMutation.isPending}
+            data-testid="confirm-delete-person-button"
+            styles={{
+              root: {
+                backgroundColor: '#d4351c',
+                color: '#ffffff',
+                border: 'none',
+                boxShadow: '0 2px 0 #8a220e',
+                fontFamily: '"GDS Transport", arial, sans-serif',
+                fontWeight: 700,
+              },
+            }}
+          >
+            Confirm Deletion
+          </Button>
+        </Group>
+      </Modal>
 
       <Modal
         opened={deleteModalOpen}
