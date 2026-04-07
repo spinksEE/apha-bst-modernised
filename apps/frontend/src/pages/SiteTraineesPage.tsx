@@ -17,7 +17,7 @@ import {
   ScrollArea,
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-import { useSearchSites, useSite, useDeleteSite } from '../hooks/useSites';
+import { useAllSites, useSearchSites, useSite, useDeleteSite } from '../hooks/useSites';
 import type { SiteListItem } from '@apha-bst/shared';
 
 export function SiteTraineesPage(): React.JSX.Element {
@@ -35,9 +35,12 @@ export function SiteTraineesPage(): React.JSX.Element {
     onDropdownClose: () => combobox.resetSelectedOption(),
   });
 
+  const { data: allSites, isLoading: isLoadingAll } = useAllSites();
   const { data: searchResults, isLoading: isSearching } = useSearchSites({
     name: debouncedSearch || undefined,
   });
+  const sites = debouncedSearch ? searchResults : allSites;
+  const isSitesLoading = debouncedSearch ? isSearching : isLoadingAll;
   const { data: selectedSite, isLoading: isSiteLoading } = useSite(selectedPlantNo);
   const deleteSiteMutation = useDeleteSite();
 
@@ -48,7 +51,7 @@ export function SiteTraineesPage(): React.JSX.Element {
   function handleSiteSelect(plantNo: string) {
     setSelectedPlantNo(plantNo);
     setSearchParams({ selected: plantNo });
-    const site = searchResults?.find((s) => s.plant_no === plantNo);
+    const site = sites?.find((s) => s.plant_no === plantNo);
     if (site) {
       setSearchValue(formatSiteOption(site));
     }
@@ -83,12 +86,12 @@ export function SiteTraineesPage(): React.JSX.Element {
 
   const options = useMemo(
     () =>
-      (searchResults ?? []).map((site) => (
+      (sites ?? []).map((site) => (
         <Combobox.Option value={site.plant_no} key={site.plant_no}>
           {formatSiteOption(site)}
         </Combobox.Option>
       )),
-    [searchResults],
+    [sites],
   );
 
   return (
@@ -142,7 +145,7 @@ export function SiteTraineesPage(): React.JSX.Element {
               onClick={() => combobox.openDropdown()}
               onFocus={() => combobox.openDropdown()}
               onBlur={() => combobox.closeDropdown()}
-              rightSection={isSearching ? <Loader size={16} aria-label="Searching sites" /> : null}
+              rightSection={isSitesLoading ? <Loader size={16} aria-label="Searching sites" /> : null}
               data-testid="site-search-input"
               aria-autocomplete="list"
               autoComplete="off"
@@ -159,7 +162,7 @@ export function SiteTraineesPage(): React.JSX.Element {
                   options
                 ) : (
                   <Combobox.Empty>
-                    {isSearching ? 'Searching...' : 'No sites found'}
+                    {isSitesLoading ? 'Loading...' : 'No sites found'}
                   </Combobox.Empty>
                 )}
               </ScrollArea.Autosize>
@@ -167,6 +170,36 @@ export function SiteTraineesPage(): React.JSX.Element {
           </Combobox.Dropdown>
         </Combobox>
       </Box>
+
+      {!selectedPlantNo && (
+        isSitesLoading ? (
+          <Loader data-testid="sites-loading" aria-label="Loading sites" />
+        ) : (sites ?? []).length > 0 ? (
+          <Table striped highlightOnHover withTableBorder data-testid="sites-table">
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th scope="col">Site name</Table.Th>
+                <Table.Th scope="col">Plant number</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
+              {(sites ?? []).map((site) => (
+                <Table.Tr
+                  key={site.plant_no}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => handleSiteSelect(site.plant_no)}
+                  data-testid={`site-row-${site.plant_no}`}
+                >
+                  <Table.Td>{site.name}</Table.Td>
+                  <Table.Td>{site.plant_no}</Table.Td>
+                </Table.Tr>
+              ))}
+            </Table.Tbody>
+          </Table>
+        ) : (
+          <Text c="dimmed" data-testid="no-sites-message">No sites found.</Text>
+        )
+      )}
 
       {selectedPlantNo && (
         <>
