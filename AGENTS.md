@@ -63,6 +63,7 @@ pnpm run prisma:studio        # visual editor at localhost:5555
 - rules/architecture.md
 - rules/docker-setup.md
 - rules/gds-design-system.md
+- rules/postgresql.md
 
 ## Ports
 
