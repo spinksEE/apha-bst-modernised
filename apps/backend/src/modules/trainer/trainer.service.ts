@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateTrainerDto } from './create-trainer.dto';
 
@@ -58,6 +62,16 @@ export class TrainerService {
 
   async delete(id: number) {
     await this.findById(id);
+
+    const hasTrainingRecords = await this.prisma.training.findFirst({
+      where: { trainer_id: id, is_deleted: false },
+    });
+    if (hasTrainingRecords) {
+      throw new ConflictException(
+        'Training records reference this trainer. Delete the training records first.',
+      );
+    }
+
     return this.prisma.trainer.delete({
       where: { trainer_id: id },
     });
