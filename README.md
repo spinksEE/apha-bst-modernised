@@ -12,7 +12,6 @@ A modernised web application for the Animal and Plant Health Agency to manage tr
 | pnpm | 9.15+ | `npm install -g pnpm` |
 | Docker | 24+ | https://docs.docker.com/get-docker |
 | Docker Compose | 2.x+ | Included with Docker Desktop |
-| dev-browser | latest | `npm install -g dev-browser && dev-browser install` |
 
 ## Getting started
 
@@ -40,12 +39,12 @@ Once running:
 
 ```bash
 # Backend
-docker-compose exec backend pnpm test          # unit tests
-docker-compose exec backend pnpm test:e2e      # e2e tests
+docker compose exec backend pnpm test          # unit tests
+docker compose exec backend pnpm test:e2e      # e2e tests
 
 # Frontend
-docker-compose exec frontend pnpm test         # unit tests
-docker-compose exec frontend pnpm exec playwright test  # acceptance tests
+docker compose exec frontend pnpm test         # unit tests
+docker compose exec frontend pnpm exec playwright test  # acceptance tests
 ```
 
 ## Stopping

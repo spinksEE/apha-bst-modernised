@@ -13,3 +13,23 @@ model HealthCheck {
   status    String
   checkedAt DateTime @default(now())
 }
+
+model Site {
+  plant_no          String   @id @db.VarChar(11)
+  name              String   @unique @db.VarChar(50)
+  address_line_1    String?  @db.VarChar(50)
+  address_line_2    String?  @db.VarChar(50)
+  address_town      String?  @db.VarChar(50)
+  address_county    String?  @db.VarChar(50)
+  address_post_code String?  @db.VarChar(50)
+  telephone         String?  @db.VarChar(50)
+  fax               String?  @db.VarChar(50)
+  is_apha_site      Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // TODO FT-002: Add Trainee relation (one-to-many)
+
+  @@index([name])
+  @@map("sites")
+}

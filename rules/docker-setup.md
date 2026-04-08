@@ -368,7 +368,7 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
 
 # -----------------------------------------------------------------------------
-# Frontend Configuration (Optional - docker-compose sets these)
+# Frontend Configuration (Optional - docker compose sets these)
 # -----------------------------------------------------------------------------
 # Only needed if running frontend outside of Docker
 # VITE_API_URL=http://localhost:3001/api
@@ -426,7 +426,7 @@ app.enableCors({
 - **Purpose**: Persist database data
 - **Location**: Managed by Docker (usually `/var/lib/docker/volumes/`)
 - **Survives**: Container restarts, rebuilds
-- **Does NOT survive**: `docker-compose down -v` (warning!)
+- **Does NOT survive**: `docker compose down -v` (warning!)
 
 ### Bind Mounts (Development)
 
@@ -448,13 +448,13 @@ app.enableCors({
 
 ```bash
 # Start in foreground (see logs)
-docker-compose up
+docker compose up
 
 # Start in background (detached)
-docker-compose up -d
+docker compose up -d
 
 # Rebuild and start (after Dockerfile changes)
-docker-compose up --build
+docker compose up --build
 ```
 
 ---
@@ -463,13 +463,13 @@ docker-compose up --build
 
 ```bash
 # Stop containers (keeps volumes)
-docker-compose stop
+docker compose stop
 
 # Stop and remove containers (keeps volumes)
-docker-compose down
+docker compose down
 
 # Stop, remove containers AND volumes (WARNING: Deletes database!)
-docker-compose down -v
+docker compose down -v
 ```
 
 ---
@@ -478,13 +478,13 @@ docker-compose down -v
 
 ```bash
 # All services
-docker-compose logs -f
+docker compose logs -f
 
 # Specific service
-docker-compose logs -f backend
+docker compose logs -f backend
 
 # Last 100 lines
-docker-compose logs --tail=100 frontend
+docker compose logs --tail=100 frontend
 ```
 
 ---
@@ -493,16 +493,16 @@ docker-compose logs --tail=100 frontend
 
 ```bash
 # Open shell in backend container
-docker-compose exec backend sh
+docker compose exec backend sh
 
 # Run Prisma migrations
-docker-compose exec backend npx prisma migrate dev
+docker compose exec backend npx prisma migrate dev
 
 # Seed database
-docker-compose exec backend npx prisma db seed
+docker compose exec backend npx prisma db seed
 
 # Open PostgreSQL shell
-docker-compose exec postgres psql -U postgres -d apha_bst
+docker compose exec postgres psql -U postgres -d apha_bst
 ```
 
 ---
@@ -511,16 +511,16 @@ docker-compose exec postgres psql -U postgres -d apha_bst
 
 ```bash
 # Create new migration
-docker-compose exec backend npx prisma migrate dev --name add_field
+docker compose exec backend npx prisma migrate dev --name add_field
 
 # Apply migrations (production)
-docker-compose exec backend npx prisma migrate deploy
+docker compose exec backend npx prisma migrate deploy
 
 # Reset database (WARNING: Deletes all data!)
-docker-compose exec backend npx prisma migrate reset
+docker compose exec backend npx prisma migrate reset
 
 # View database in Prisma Studio
-docker-compose exec backend npx prisma studio
+docker compose exec backend npx prisma studio
 # Then visit: http://localhost:5555
 ```
 
@@ -530,10 +530,10 @@ docker-compose exec backend npx prisma studio
 
 ```bash
 # Rebuild backend only
-docker-compose up -d --no-deps --build backend
+docker compose up -d --no-deps --build backend
 
 # Rebuild frontend only
-docker-compose up -d --no-deps --build frontend
+docker compose up -d --no-deps --build frontend
 ```
 
 ---
@@ -590,13 +590,13 @@ Error: connect ECONNREFUSED postgres:5432
 **Solution**:
 ```bash
 # Wait for postgres to be healthy
-docker-compose up postgres
+docker compose up postgres
 
 # Check health status
-docker-compose ps
+docker compose ps
 
 # Restart backend after postgres is ready
-docker-compose restart backend
+docker compose restart backend
 ```
 
 ---
@@ -609,10 +609,10 @@ docker-compose restart backend
 **Solution (Backend)**:
 ```bash
 # Check if volume is mounted correctly
-docker-compose exec backend ls -la /app
+docker compose exec backend ls -la /app
 
 # Restart with rebuild
-docker-compose up -d --build backend
+docker compose up -d --build backend
 ```
 
 **Solution (Frontend)**:
@@ -643,7 +643,7 @@ Error: EACCES: permission denied
 rm -rf apps/frontend/node_modules apps/backend/node_modules
 
 # Rebuild containers
-docker-compose up --build
+docker compose up --build
 
 # Node modules now exist only in containers (anonymous volumes)
 ```
@@ -661,11 +661,11 @@ docker-compose up --build
 ls -la .env
 
 # Restart containers to reload env vars
-docker-compose down
-docker-compose up -d
+docker compose down
+docker compose up -d
 
 # Check env vars in container
-docker-compose exec backend printenv | grep ADMIN
+docker compose exec backend printenv | grep ADMIN
 ```
 
 ---
@@ -680,10 +680,10 @@ Error: P3009: migrate found failed migration
 **Solution**:
 ```bash
 # Reset database and reapply migrations
-docker-compose exec backend npx prisma migrate reset
+docker compose exec backend npx prisma migrate reset
 
 # Or manually resolve
-docker-compose exec backend npx prisma migrate resolve --applied <migration_name>
+docker compose exec backend npx prisma migrate resolve --applied <migration_name>
 ```
 
 ---
@@ -733,7 +733,7 @@ docker volume rm apha-bst_postgres_data
 ### PostgreSQL Health Check
 
 ```bash
-docker-compose exec postgres pg_isready -U postgres
+docker compose exec postgres pg_isready -U postgres
 # Output: postgres:5432 - accepting connections
 ```
 

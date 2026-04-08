@@ -1,26 +1,8 @@
-# Acceptance Testing & Dev-Browser Verification
+# Acceptance Testing
 
-When building features with frontend user interaction (forms, buttons, navigation), two verification steps are required:
+When building features with frontend user interaction (forms, buttons, navigation), verification steps are required:
 
-## 1. Dev-browser verification (RALPH loop backpressure)
-
-Use `dev-browser --headless` to verify the feature works in a real browser **before marking the task complete**. This is a blocking gate — if it fails, the task is not done.
-
-```bash
-dev-browser --headless <<'EOF'
-const page = await browser.getPage("main");
-await page.goto("http://localhost:3000/some-feature");
-await page.locator('[data-testid="submit-button"]').click();
-await page.waitForSelector('[data-testid="success-message"]');
-console.log("Verification passed");
-EOF
-```
-
-- Run against the Dockerised app at `http://localhost:3000` — ensure containers are healthy first
-- On failure: inspect with `page.snapshotForAI()`, fix the implementation, re-verify
-- Use the same assertions you'll put in the Playwright test — this is a rapid feedback step
-
-## 2. Playwright acceptance tests (permanent, CI-runnable)
+## Playwright acceptance tests (permanent, CI-runnable)
 
 Every interactive feature must have a Playwright test in `apps/frontend/e2e/`.
 
