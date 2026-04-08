@@ -8,6 +8,18 @@ generator client {
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
+enum TrainingType {
+  Trained
+  CascadeTrained
+  TrainingConfirmed
+}
+
+enum Species {
+  Cattle
+  Sheep
+  Goat
+}
+
 model HealthCheck {
   id        Int      @id @default(autoincrement())
   status    String
@@ -45,8 +57,9 @@ model Person {
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
-  site    Site     @relation("SitePersons", fields: [site_id], references: [plant_no])
-  trainer Trainer? @relation("PersonTrainer")
+  site      Site       @relation("SitePersons", fields: [site_id], references: [plant_no])
+  trainer   Trainer?   @relation("PersonTrainer")
+  trainings Training[] @relation("TraineeTrainings")
 
   @@index([first_name, last_name, site_id])
   @@map("persons")
@@ -62,8 +75,33 @@ model Trainer {
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
-  location Site    @relation("SiteTrainers", fields: [location_id], references: [plant_no])
-  person   Person? @relation("PersonTrainer", fields: [person_id], references: [person_id])
+  location  Site       @relation("SiteTrainers", fields: [location_id], references: [plant_no])
+  person    Person?    @relation("PersonTrainer", fields: [person_id], references: [person_id])
+  trainings Training[] @relation("TrainerTrainings")
 
   @@map("trainers")
+}
+
+model Training {
+  training_id    Int          @id @default(autoincrement())
+  trainee_id     Int
+  trainer_id     Int
+  date_trained   DateTime     @db.Date
+  species_trained Species[]
+  training_type  TrainingType
+  is_deleted     Boolean      @default(false)
+  created_by     String?      @default("system")
+  created_at     DateTime     @default(now())
+  modified_by    String?      @default("system")
+  modified_at    DateTime     @updatedAt
+  deleted_by     String?
+  deleted_at     DateTime?
+
+  trainee Person  @relation("TraineeTrainings", fields: [trainee_id], references: [person_id], onDelete: Restrict)
+  trainer Trainer @relation("TrainerTrainings", fields: [trainer_id], references: [trainer_id], onDelete: Restrict)
+
+  @@index([trainee_id])
+  @@index([trainer_id])
+  @@index([date_trained])
+  @@map("trainings")
 }

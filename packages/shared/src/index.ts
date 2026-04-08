@@ -20,3 +20,12 @@ export type {
   TrainerListItem,
   CreateTrainerRequest,
 } from './trainer.types';
+
+export type {
+  TrainingType,
+  Species,
+  Training,
+  TrainingListItem,
+  CreateTrainingRequest,
+  UpdateTrainingRequest,
+} from './training.types';
