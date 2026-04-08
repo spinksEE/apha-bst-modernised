@@ -10,5 +10,8 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
+    launchOptions: {
+      executablePath: process.env.CHROME_BIN || undefined,
+    },
   },
 });
