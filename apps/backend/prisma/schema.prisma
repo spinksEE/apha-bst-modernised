@@ -28,8 +28,42 @@ model Site {
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 
-  // TODO FT-002: Add Trainee relation (one-to-many)
+  persons  Person[]  @relation("SitePersons")
+  trainers Trainer[] @relation("SiteTrainers")
 
   @@index([name])
   @@map("sites")
+}
+
+model Person {
+  person_id    Int      @id @default(autoincrement())
+  first_name   String   @db.VarChar(50)
+  last_name    String   @db.VarChar(50)
+  display_name String   @db.VarChar(101)
+  site_id      String   @db.VarChar(11)
+  has_training Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  site    Site     @relation("SitePersons", fields: [site_id], references: [plant_no])
+  trainer Trainer? @relation("PersonTrainer")
+
+  @@index([first_name, last_name, site_id])
+  @@map("persons")
+}
+
+model Trainer {
+  trainer_id   Int      @id @default(autoincrement())
+  first_name   String   @db.VarChar(50)
+  last_name    String   @db.VarChar(50)
+  display_name String   @db.VarChar(101)
+  location_id  String   @db.VarChar(11)
+  person_id    Int?     @unique
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  location Site    @relation("SiteTrainers", fields: [location_id], references: [plant_no])
+  person   Person? @relation("PersonTrainer", fields: [person_id], references: [person_id])
+
+  @@map("trainers")
 }

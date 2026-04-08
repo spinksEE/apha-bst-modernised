@@ -49,6 +49,7 @@ export class SiteService {
   async findByPlantNo(plantNo: string) {
     const site = await this.prisma.site.findUnique({
       where: { plant_no: plantNo },
+      include: { _count: { select: { persons: true } } },
     });
     if (!site) {
       throw new NotFoundException(
@@ -116,12 +117,18 @@ export class SiteService {
   }
 
   async deleteSite(plantNo: string) {
-    await this.findByPlantNo(plantNo);
+    const site = await this.findByPlantNo(plantNo);
 
-    // TODO FT-002: Check for associated trainee records (BR-008)
-    // When Trainee model is added, query for linked trainees and throw
-    // ConflictException with message:
-    // "There are personnel from [Site Name]. You can only delete a site with no trainees."
+    const [personCount, trainerCount] = await Promise.all([
+      this.prisma.person.count({ where: { site_id: plantNo } }),
+      this.prisma.trainer.count({ where: { location_id: plantNo } }),
+    ]);
+
+    if (personCount > 0 || trainerCount > 0) {
+      throw new ConflictException(
+        `There are personnel from ${site.name}. You can only delete a site with no trainees.`,
+      );
+    }
 
     return this.prisma.site.delete({
       where: { plant_no: plantNo },

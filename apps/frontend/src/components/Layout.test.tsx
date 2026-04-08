@@ -38,6 +38,16 @@ describe('Layout', () => {
     expect(viewLink.closest('a')).toHaveAttribute('href', '/sites');
   });
 
+  it('renders navigation links for Add Person and Manage Trainers', () => {
+    renderLayout();
+
+    const addPersonLink = screen.getByText('Add Person');
+    expect(addPersonLink.closest('a')).toHaveAttribute('href', '/persons/add');
+
+    const trainersLink = screen.getByText('Manage Trainers');
+    expect(trainersLink.closest('a')).toHaveAttribute('href', '/trainers');
+  });
+
   it('renders the ALPHA phase banner', () => {
     renderLayout();
 

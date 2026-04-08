@@ -4,15 +4,19 @@ import { MemoryRouter } from 'react-router-dom';
 import { MantineProvider } from '@mantine/core';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { SiteTraineesPage } from './SiteTraineesPage';
-import type { Site, SiteListItem } from '@apha-bst/shared';
+import type { Site, SiteListItem, Person } from '@apha-bst/shared';
 
 vi.mock('../api/sites');
+vi.mock('../api/persons');
 
 import { searchSites, getSiteByPlantNo, deleteSite } from '../api/sites';
+import { getPersons, deletePerson } from '../api/persons';
 
 const mockedSearchSites = vi.mocked(searchSites);
 const mockedGetSite = vi.mocked(getSiteByPlantNo);
 const mockedDeleteSite = vi.mocked(deleteSite);
+const mockedGetPersons = vi.mocked(getPersons);
+const mockedDeletePerson = vi.mocked(deletePerson);
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -36,7 +40,27 @@ const siteDetail: Site = {
   telephone: '01onal',
   fax: null,
   is_apha_site: true,
+  personnel_count: 2,
 };
+
+const personList: Person[] = [
+  {
+    person_id: 1,
+    first_name: 'John',
+    last_name: 'Smith',
+    display_name: 'Smith, John',
+    site_id: 'UK001',
+    has_training: true,
+  },
+  {
+    person_id: 2,
+    first_name: 'Jane',
+    last_name: 'Doe',
+    display_name: 'Doe, Jane',
+    site_id: 'UK001',
+    has_training: false,
+  },
+];
 
 function renderPage(initialEntries = ['/sites']) {
   const queryClient = new QueryClient({
@@ -88,11 +112,12 @@ describe('SiteTraineesPage', () => {
     expect(screen.getByText('Oxton, Oxfordshire')).toBeInTheDocument();
     expect(screen.getByText('OX1 2AB')).toBeInTheDocument();
     expect(screen.getByText('Tel: 01onal')).toBeInTheDocument();
-    expect(screen.getByText('Total Personnel: 0')).toBeInTheDocument();
+    expect(screen.getByText('Total Personnel: 2')).toBeInTheDocument();
   });
 
-  it('shows the empty personnel message (FT-002 stub)', async () => {
-    mockedGetSite.mockResolvedValue(siteDetail);
+  it('shows empty personnel message when site has no persons', async () => {
+    mockedGetSite.mockResolvedValue({ ...siteDetail, personnel_count: 0 });
+    mockedGetPersons.mockResolvedValue([]);
 
     renderPage(['/sites?selected=UK001']);
 
@@ -101,6 +126,53 @@ describe('SiteTraineesPage', () => {
     });
 
     expect(screen.getByText('No trainees associated with this site.')).toBeInTheDocument();
+  });
+
+  it('renders personnel data with display names and training status', async () => {
+    mockedGetSite.mockResolvedValue(siteDetail);
+    mockedGetPersons.mockResolvedValue(personList);
+
+    renderPage(['/sites?selected=UK001']);
+
+    await waitFor(() => {
+      expect(screen.getByText('Smith, John')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Doe, Jane')).toBeInTheDocument();
+    expect(screen.getByTestId('edit-person-1')).toBeInTheDocument();
+    expect(screen.getByTestId('delete-person-1')).toBeInTheDocument();
+  });
+
+  it('shows delete person confirmation modal and handles BR-012 conflict', async () => {
+    mockedGetSite.mockResolvedValue(siteDetail);
+    mockedGetPersons.mockResolvedValue(personList);
+    mockedDeletePerson.mockRejectedValue({
+      response: {
+        status: 409,
+        data: { message: 'Training records must be deleted before a person can be removed.' },
+      },
+    });
+
+    renderPage(['/sites?selected=UK001']);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('delete-person-1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('delete-person-1'));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Are you sure you want to delete/)).toBeInTheDocument();
+    });
+    expect(screen.getAllByText(/Smith, John/).length).toBeGreaterThanOrEqual(1);
+
+    fireEvent.click(screen.getByTestId('confirm-delete-person-button'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('delete-person-error')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText(/Training records must be deleted/)).toBeInTheDocument();
   });
 
   it('shows edit and delete buttons for a selected site', async () => {

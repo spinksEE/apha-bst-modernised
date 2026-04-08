@@ -126,6 +126,66 @@ const devSites = [
   },
 ];
 
+const devPersons = [
+  {
+    first_name: 'James',
+    last_name: 'Wilson',
+    site_id: 'AB12345678', // Greenfield Farm
+    has_training: true,
+  },
+  {
+    first_name: 'Sarah',
+    last_name: 'Thompson',
+    site_id: 'AB12345678', // Greenfield Farm
+    has_training: false,
+  },
+  {
+    first_name: 'Robert',
+    last_name: 'Davies',
+    site_id: 'AB12345678', // Greenfield Farm
+    has_training: false,
+  },
+  {
+    first_name: 'Emily',
+    last_name: 'Clark',
+    site_id: 'AB12345678', // Greenfield Farm
+    has_training: true,
+  },
+  {
+    first_name: 'Michael',
+    last_name: 'Hughes',
+    site_id: 'CD23456789', // Northern Meats Co
+    has_training: false,
+  },
+  {
+    first_name: 'Laura',
+    last_name: 'Bennett',
+    site_id: 'CD23456789', // Northern Meats Co
+    has_training: true,
+  },
+  {
+    first_name: 'David',
+    last_name: 'Patel',
+    site_id: 'CD23456789', // Northern Meats Co
+    has_training: false,
+  },
+];
+
+const devTrainers = [
+  {
+    first_name: 'Catherine',
+    last_name: 'Reed',
+    location_id: 'EF34567890', // APHA Regional Lab Weybridge
+    person_id: null, // APHA staff trainer
+  },
+  {
+    first_name: 'James',
+    last_name: 'Wilson',
+    location_id: 'AB12345678', // Greenfield Farm — cascade trainer linked to person
+    person_id: 1, // Will be linked to seeded person_id 1
+  },
+];
+
 async function main() {
   console.log(`Seeding ${devSites.length} dev sites...`);
 
@@ -147,8 +207,81 @@ async function main() {
     });
   }
 
-  const count = await prisma.site.count();
-  console.log(`Seeding complete: ${count} total sites in database`);
+  const siteCount = await prisma.site.count();
+  console.log(`Seeded ${siteCount} sites`);
+
+  console.log(`Seeding ${devPersons.length} dev persons...`);
+
+  const seededPersonIds: number[] = [];
+  for (const person of devPersons) {
+    const display_name = `${person.last_name}, ${person.first_name}`;
+    const existing = await prisma.person.findFirst({
+      where: {
+        first_name: person.first_name,
+        last_name: person.last_name,
+        site_id: person.site_id,
+      },
+    });
+    if (existing) {
+      await prisma.person.update({
+        where: { person_id: existing.person_id },
+        data: { display_name, has_training: person.has_training },
+      });
+      seededPersonIds.push(existing.person_id);
+    } else {
+      const created = await prisma.person.create({
+        data: {
+          first_name: person.first_name,
+          last_name: person.last_name,
+          display_name,
+          site_id: person.site_id,
+          has_training: person.has_training,
+        },
+      });
+      seededPersonIds.push(created.person_id);
+    }
+  }
+
+  const personCount = await prisma.person.count();
+  console.log(`Seeded ${personCount} persons`);
+
+  console.log(`Seeding ${devTrainers.length} dev trainers...`);
+
+  for (const trainer of devTrainers) {
+    const display_name = `${trainer.last_name}, ${trainer.first_name}`;
+    // Resolve person_id: if trainer references person index 1, use the actual seeded person_id
+    const resolvedPersonId =
+      trainer.person_id !== null ? seededPersonIds[trainer.person_id - 1] : null;
+
+    const existing = await prisma.trainer.findFirst({
+      where: {
+        first_name: trainer.first_name,
+        last_name: trainer.last_name,
+        location_id: trainer.location_id,
+      },
+    });
+    if (existing) {
+      await prisma.trainer.update({
+        where: { trainer_id: existing.trainer_id },
+        data: { display_name, person_id: resolvedPersonId },
+      });
+    } else {
+      await prisma.trainer.create({
+        data: {
+          first_name: trainer.first_name,
+          last_name: trainer.last_name,
+          display_name,
+          location_id: trainer.location_id,
+          person_id: resolvedPersonId,
+        },
+      });
+    }
+  }
+
+  const trainerCount = await prisma.trainer.count();
+  console.log(`Seeded ${trainerCount} trainers`);
+
+  console.log('Seeding complete');
 }
 
 main()

@@ -9,6 +9,7 @@ export interface Site {
   telephone: string | null;
   fax: string | null;
   is_apha_site: boolean;
+  personnel_count?: number;
 }
 
 export interface CreateSiteRequest {
