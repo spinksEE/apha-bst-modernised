@@ -105,4 +105,68 @@ test.describe('Seed smoke tests', () => {
     await expect(page.getByText('Wilson, James')).toBeVisible();
     await expect(page.getByText('Thompson, Sarah')).toBeVisible();
   });
+
+  test('API returns seeded training records', async ({ request }) => {
+    // Find James Wilson's person_id
+    const personsRes = await request.get(`${API}/persons`);
+    const persons = await personsRes.json();
+    const wilson = persons.find(
+      (p: { first_name: string; last_name: string }) =>
+        p.first_name === 'James' && p.last_name === 'Wilson',
+    );
+    expect(wilson).toBeDefined();
+
+    // Fetch training records for James Wilson
+    const trainingsRes = await request.get(
+      `${API}/trainings/by-trainee?trainee_id=${wilson.person_id}`,
+    );
+    expect(trainingsRes.ok()).toBe(true);
+
+    const trainings = await trainingsRes.json();
+    expect(Array.isArray(trainings)).toBe(true);
+    expect(trainings.length).toBeGreaterThanOrEqual(2);
+
+    // Verify known seed training: Trained in Cattle on 2025-06-15
+    const cattleTraining = trainings.find(
+      (t: { training_type: string; date_trained: string }) =>
+        t.training_type === 'Trained' && t.date_trained === '2025-06-15',
+    );
+    expect(cattleTraining).toBeDefined();
+    expect(cattleTraining.species_trained).toContain('Cattle');
+
+    // Verify CascadeTrained in Goat, Sheep on 2025-09-20
+    const cascadeTraining = trainings.find(
+      (t: { training_type: string; date_trained: string }) =>
+        t.training_type === 'CascadeTrained' && t.date_trained === '2025-09-20',
+    );
+    expect(cascadeTraining).toBeDefined();
+    expect(cascadeTraining.species_trained).toContain('Goat');
+    expect(cascadeTraining.species_trained).toContain('Sheep');
+  });
+
+  test('training history page shows seeded data for James Wilson', async ({ page, request }) => {
+    // Find James Wilson's person_id
+    const personsRes = await request.get(`${API}/persons`);
+    const persons = await personsRes.json();
+    const wilson = persons.find(
+      (p: { first_name: string; last_name: string }) =>
+        p.first_name === 'James' && p.last_name === 'Wilson',
+    );
+    expect(wilson).toBeDefined();
+
+    await page.goto(`/persons/${wilson.person_id}/training`);
+
+    // Person details should be visible
+    await expect(page.getByTestId('person-name')).toContainText('Wilson, James');
+
+    // Training table should have at least 2 rows (2 seed records for Wilson)
+    const table = page.getByTestId('training-table');
+    await expect(table).toBeVisible();
+    const rows = table.locator('tbody tr');
+    expect(await rows.count()).toBeGreaterThanOrEqual(2);
+
+    // Should show seeded training types
+    await expect(table).toContainText('Trained');
+    await expect(table).toContainText('Cascade Trained');
+  });
 });
