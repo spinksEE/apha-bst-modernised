@@ -52,22 +52,27 @@ describe('ErrorBoundary', () => {
   });
 
   it('resets state when resetError is invoked', () => {
-    const { rerender } = render(
+    // Use a mutable variable so the child reads the updated value
+    // when ErrorBoundary re-renders after resetError clears hasError.
+    let shouldThrow = true;
+
+    function ConditionalThrower() {
+      if (shouldThrow) throw new Error('Test render error');
+      return <div>Normal content</div>;
+    }
+
+    render(
       <ErrorBoundary fallbackRender={(props) => <FallbackComponent {...props} />}>
-        <ThrowingComponent shouldThrow={true} />
+        <ConditionalThrower />
       </ErrorBoundary>,
     );
 
     // Error boundary caught the error
     expect(screen.getByText('Something went wrong')).toBeInTheDocument();
 
-    // Click reset, then re-render with non-throwing child
+    // Stop throwing, then click reset — boundary re-renders children successfully
+    shouldThrow = false;
     fireEvent.click(screen.getByText('Reset'));
-    rerender(
-      <ErrorBoundary fallbackRender={(props) => <FallbackComponent {...props} />}>
-        <ThrowingComponent shouldThrow={false} />
-      </ErrorBoundary>,
-    );
 
     expect(screen.getByText('Normal content')).toBeInTheDocument();
   });
