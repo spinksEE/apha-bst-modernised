@@ -23,14 +23,14 @@ All test and lint commands run inside Docker containers:
 
 ```bash
 # Backend
-docker compose exec backend pnpm test          # unit tests
-docker compose exec backend pnpm test:e2e      # e2e tests
-docker compose exec backend pnpm lint
+docker compose exec backend pnpm --filter @apha-bst/backend test          # unit tests
+docker compose exec backend pnpm --filter @apha-bst/backend test:e2e      # e2e tests
+docker compose exec backend pnpm --filter @apha-bst/backend lint
 
 # Frontend
-docker compose exec frontend pnpm test         # unit tests
-docker compose exec frontend pnpm exec playwright test  # acceptance tests
-docker compose exec frontend pnpm type-check
+docker compose exec frontend pnpm --filter @apha-bst/frontend test         # unit tests
+docker compose exec frontend pnpm --filter @apha-bst/frontend exec playwright test  # acceptance tests
+docker compose exec frontend pnpm --filter @apha-bst/frontend type-check
 ```
 
 Database:

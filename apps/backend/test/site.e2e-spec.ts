@@ -28,10 +28,14 @@ describe('Site Management (e2e)', () => {
   });
 
   beforeEach(async () => {
+    await prisma.trainer.deleteMany();
+    await prisma.person.deleteMany();
     await prisma.site.deleteMany();
   });
 
   afterAll(async () => {
+    await prisma.trainer.deleteMany();
+    await prisma.person.deleteMany();
     await prisma.site.deleteMany();
     await app.close();
   });
