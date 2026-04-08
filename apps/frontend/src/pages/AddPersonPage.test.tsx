@@ -9,10 +9,9 @@ import type { SiteListItem } from '@apha-bst/shared';
 vi.mock('../api/sites');
 vi.mock('../api/persons');
 
-import { checkDuplicate, createPerson } from '../api/persons';
+import { checkDuplicate } from '../api/persons';
 
 const mockedCheckDuplicate = vi.mocked(checkDuplicate);
-const mockedCreatePerson = vi.mocked(createPerson);
 
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
@@ -110,7 +109,7 @@ describe('AddPersonPage', () => {
   });
 
   it('shows duplicate modal when checkDuplicate returns isDuplicate true', async () => {
-    mockedCheckDuplicate.mockResolvedValue({ isDuplicate: true });
+    mockedCheckDuplicate.mockResolvedValue({ isDuplicate: true, existing: [] });
 
     // Pre-select site via URL param so the site_id form field is pre-populated
     renderPage(['/persons/add?site_id=UK001']);
@@ -138,7 +137,7 @@ describe('AddPersonPage', () => {
   });
 
   it('closes duplicate modal when cancel is clicked', async () => {
-    mockedCheckDuplicate.mockResolvedValue({ isDuplicate: true });
+    mockedCheckDuplicate.mockResolvedValue({ isDuplicate: true, existing: [] });
 
     // Pre-select site via URL param so the site_id form field is pre-populated
     renderPage(['/persons/add?site_id=UK001']);
@@ -168,7 +167,7 @@ describe('AddPersonPage', () => {
   });
 
   it('proceeds with creation when checkDuplicate returns no duplicate', async () => {
-    mockedCheckDuplicate.mockResolvedValue({ isDuplicate: false });
+    mockedCheckDuplicate.mockResolvedValue({ isDuplicate: false, existing: [] });
 
     // Pre-select site via URL param so the site_id form field is pre-populated
     renderPage(['/persons/add?site_id=UK002']);
@@ -193,7 +192,7 @@ describe('AddPersonPage', () => {
   });
 
   it('navigates to /sites?selected=<site_id> on successful save', async () => {
-    mockedCheckDuplicate.mockResolvedValue({ isDuplicate: false });
+    mockedCheckDuplicate.mockResolvedValue({ isDuplicate: false, existing: [] });
     mockMutate.mockImplementation((_data, { onSuccess }) => {
       onSuccess({ person_id: 42, display_name: 'Doe, Jane', first_name: 'Jane', last_name: 'Doe', site_id: 'UK002', has_training: false });
     });
