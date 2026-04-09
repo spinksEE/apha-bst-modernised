@@ -1,13 +1,16 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { MantineProvider } from '@mantine/core';
 import { describe, it, expect } from 'vitest';
 import { Layout } from './Layout';
 
 function renderLayout() {
   return render(
-    <MemoryRouter>
-      <Layout />
-    </MemoryRouter>,
+    <MantineProvider>
+      <MemoryRouter>
+        <Layout />
+      </MemoryRouter>
+    </MantineProvider>,
   );
 }
 
@@ -28,24 +31,47 @@ describe('Layout', () => {
     expect(homeLink.closest('a')).toHaveAttribute('href', '/');
   });
 
-  it('renders navigation links for Register Site and View Sites', () => {
+  it('renders "Hello, Smith, J (Supv)" in header', () => {
     renderLayout();
 
-    const registerLink = screen.getByText('Register Site');
-    expect(registerLink.closest('a')).toHaveAttribute('href', '/sites/register');
-
-    const viewLink = screen.getByText('View Sites');
-    expect(viewLink.closest('a')).toHaveAttribute('href', '/sites');
+    expect(screen.getByText('Hello, Smith, J (Supv)')).toBeInTheDocument();
   });
 
-  it('renders navigation links for Add Person and Manage Trainers', () => {
+  it('renders "Home" link to /', () => {
     renderLayout();
 
-    const addPersonLink = screen.getByText('Add Person');
-    expect(addPersonLink.closest('a')).toHaveAttribute('href', '/persons/add');
+    const homeLink = screen.getByRole('link', { name: 'Home' });
+    expect(homeLink).toHaveAttribute('href', '/');
+  });
 
-    const trainersLink = screen.getByText('Manage Trainers');
-    expect(trainersLink.closest('a')).toHaveAttribute('href', '/trainers');
+  it('renders "Brainstem" and "Sites" dropdown triggers', () => {
+    renderLayout();
+
+    expect(screen.getByText(/Brainstem/)).toBeInTheDocument();
+    expect(screen.getByText(/Sites/)).toBeInTheDocument();
+  });
+
+  it('clicking "Brainstem" reveals "Add Training" and "Manage Trainers"', async () => {
+    renderLayout();
+
+    fireEvent.click(screen.getByText(/Brainstem/));
+
+    await waitFor(() => {
+      expect(screen.getByText('Add Training')).toBeInTheDocument();
+      expect(screen.getByText('Manage Trainers')).toBeInTheDocument();
+    });
+  });
+
+  it('clicking "Sites" reveals "View All Sites", "Add New Site", and "Add Person"', async () => {
+    renderLayout();
+
+    fireEvent.click(screen.getByText(/Sites/));
+
+    await waitFor(() => {
+      expect(screen.getByText('View All Sites')).toBeInTheDocument();
+      expect(screen.getByText('Add New Site')).toBeInTheDocument();
+      expect(screen.getByText('Add Person')).toBeInTheDocument();
+    });
   });
 
   it('renders the ALPHA phase banner', () => {
@@ -62,10 +88,10 @@ describe('Layout', () => {
     expect(main).toHaveAttribute('id', 'main-content');
   });
 
-  it('renders the footer', () => {
+  it('renders the footer with correct text', () => {
     renderLayout();
 
-    expect(screen.getByText('APHA Brainstem Training Schedule')).toBeInTheDocument();
+    expect(screen.getByText('APHA BST System v2.0 POC | Crown Copyright 2026')).toBeInTheDocument();
   });
 
   it('has accessible navigation landmark', () => {

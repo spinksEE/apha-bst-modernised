@@ -10,6 +10,8 @@ import { ManageTrainersPage } from './pages/ManageTrainersPage';
 import { RecordTrainingPage } from './pages/RecordTrainingPage';
 import { TrainingHistoryPage } from './pages/TrainingHistoryPage';
 import { EditTrainingPage } from './pages/EditTrainingPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 export function App(): React.JSX.Element {
   return (
@@ -17,6 +19,7 @@ export function App(): React.JSX.Element {
       <Routes>
         <Route path="/health" element={<HealthPage />} />
         <Route element={<Layout />}>
+          <Route index element={<DashboardPage />} />
           <Route path="/sites/register" element={<RegisterSitePage />} />
           <Route path="/sites/:plantNo/edit" element={<EditSiteNamePage />} />
           <Route path="/sites" element={<SiteTraineesPage />} />
@@ -26,6 +29,7 @@ export function App(): React.JSX.Element {
           <Route path="/training/add" element={<RecordTrainingPage />} />
           <Route path="/training/:id/edit" element={<EditTrainingPage />} />
           <Route path="/persons/:id/training" element={<TrainingHistoryPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,6 +1,19 @@
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Menu, Button } from '@mantine/core';
+import { ErrorBoundary } from './ErrorBoundary';
+import { ErrorPage } from '../pages/ErrorPage';
+
+const gdsFont = '"GDS Transport", arial, sans-serif';
+
+const menuItemStyle: React.CSSProperties = {
+  fontFamily: gdsFont,
+  fontSize: '16px',
+  color: '#0b0c0c',
+};
 
 export function Layout(): React.JSX.Element {
+  const location = useLocation();
+
   return (
     <>
       <a
@@ -16,7 +29,7 @@ export function Layout(): React.JSX.Element {
           clipPath: 'inset(50%)',
           whiteSpace: 'nowrap',
           fontSize: '16px',
-          fontFamily: '"GDS Transport", arial, sans-serif',
+          fontFamily: gdsFont,
           color: '#0b0c0c',
           backgroundColor: '#fd0',
           padding: '10px 15px',
@@ -76,90 +89,122 @@ export function Layout(): React.JSX.Element {
               textDecoration: 'none',
               fontWeight: 700,
               fontSize: '24px',
-              fontFamily: '"GDS Transport", arial, sans-serif',
+              fontFamily: gdsFont,
             }}
           >
             APHA BST
           </Link>
-          <nav aria-label="Main navigation">
-            <ul
-              style={{
-                listStyle: 'none',
-                display: 'flex',
-                gap: '20px',
-                margin: 0,
-                padding: 0,
-              }}
-            >
-              <li>
-                <Link
-                  to="/sites/register"
-                  style={{
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    fontFamily: '"GDS Transport", arial, sans-serif',
-                    fontSize: '16px',
-                  }}
-                >
-                  Register Site
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/sites"
-                  style={{
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    fontFamily: '"GDS Transport", arial, sans-serif',
-                    fontSize: '16px',
-                  }}
-                >
-                  View Sites
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/persons/add"
-                  style={{
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    fontFamily: '"GDS Transport", arial, sans-serif',
-                    fontSize: '16px',
-                  }}
-                >
-                  Add Person
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/trainers"
-                  style={{
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    fontFamily: '"GDS Transport", arial, sans-serif',
-                    fontSize: '16px',
-                  }}
-                >
-                  Manage Trainers
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/training/add"
-                  style={{
-                    color: '#ffffff',
-                    textDecoration: 'none',
-                    fontFamily: '"GDS Transport", arial, sans-serif',
-                    fontSize: '16px',
-                  }}
-                >
-                  Record Training
-                </Link>
-              </li>
-            </ul>
-          </nav>
+          <span
+            style={{
+              color: '#ffffff',
+              fontFamily: gdsFont,
+              fontSize: '16px',
+            }}
+          >
+            Hello, Smith, J (Supv)
+          </span>
         </div>
       </header>
+
+      <nav
+        aria-label="Main navigation"
+        style={{
+          backgroundColor: '#f3f2f1',
+          borderBottom: '1px solid #b1b4b6',
+        }}
+      >
+        <div
+          style={{
+            maxWidth: '1020px',
+            margin: '0 auto',
+            padding: '0 15px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+          }}
+        >
+          <Link
+            to="/"
+            style={{
+              fontFamily: gdsFont,
+              fontSize: '16px',
+              fontWeight: 700,
+              color: '#0b0c0c',
+              textDecoration: 'none',
+              padding: '10px 15px',
+            }}
+          >
+            Home
+          </Link>
+
+          <Menu trigger="click-hover" position="bottom-start" shadow="md">
+            <Menu.Target>
+              <Button
+                variant="subtle"
+                color="dark"
+                styles={{
+                  root: {
+                    fontFamily: gdsFont,
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#0b0c0c',
+                    padding: '10px 15px',
+                    height: 'auto',
+                    border: 'none',
+                    borderRadius: 0,
+                    backgroundColor: 'transparent',
+                  },
+                }}
+              >
+                Brainstem ▾
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item component={Link} to="/training/add" style={menuItemStyle}>
+                Add Training
+              </Menu.Item>
+              <Menu.Item component={Link} to="/trainers" style={menuItemStyle}>
+                Manage Trainers
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+
+          <Menu trigger="click-hover" position="bottom-start" shadow="md">
+            <Menu.Target>
+              <Button
+                variant="subtle"
+                color="dark"
+                styles={{
+                  root: {
+                    fontFamily: gdsFont,
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: '#0b0c0c',
+                    padding: '10px 15px',
+                    height: 'auto',
+                    border: 'none',
+                    borderRadius: 0,
+                    backgroundColor: 'transparent',
+                  },
+                }}
+              >
+                Sites ▾
+              </Button>
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item component={Link} to="/sites" style={menuItemStyle}>
+                View All Sites
+              </Menu.Item>
+              <Menu.Item component={Link} to="/sites/register" style={menuItemStyle}>
+                Add New Site
+              </Menu.Item>
+              <Menu.Item component={Link} to="/persons/add" style={menuItemStyle}>
+                Add Person
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </div>
+      </nav>
 
       <div
         style={{
@@ -175,7 +220,7 @@ export function Layout(): React.JSX.Element {
             padding: '5px 8px',
             display: 'inline-block',
             marginTop: '10px',
-            fontFamily: '"GDS Transport", arial, sans-serif',
+            fontFamily: gdsFont,
             fontSize: '14px',
           }}
         >
@@ -197,7 +242,14 @@ export function Layout(): React.JSX.Element {
           outline: 'none',
         }}
       >
-        <Outlet />
+        <ErrorBoundary
+          key={location.pathname}
+          fallbackRender={({ errorRef, resetError }) => (
+            <ErrorPage errorRef={errorRef} resetError={resetError} />
+          )}
+        >
+          <Outlet />
+        </ErrorBoundary>
       </main>
 
       <footer
@@ -214,12 +266,12 @@ export function Layout(): React.JSX.Element {
             maxWidth: '1020px',
             margin: '0 auto',
             padding: '0 15px',
-            fontFamily: '"GDS Transport", arial, sans-serif',
+            fontFamily: gdsFont,
             fontSize: '14px',
             color: '#505a5f',
           }}
         >
-          APHA Brainstem Training Schedule
+          APHA BST System v2.0 POC | Crown Copyright 2026
         </div>
       </footer>
     </>
