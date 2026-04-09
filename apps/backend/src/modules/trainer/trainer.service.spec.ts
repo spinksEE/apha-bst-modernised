@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 import { TrainerService } from './trainer.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -26,6 +26,9 @@ describe('TrainerService', () => {
       findUnique: jest.Mock;
       delete: jest.Mock;
     };
+    training: {
+      findFirst: jest.Mock;
+    };
   };
 
   beforeEach(async () => {
@@ -37,6 +40,9 @@ describe('TrainerService', () => {
         findMany: jest.fn(),
         findUnique: jest.fn(),
         delete: jest.fn(),
+      },
+      training: {
+        findFirst: jest.fn(),
       },
     };
 
@@ -175,15 +181,35 @@ describe('TrainerService', () => {
   });
 
   describe('delete', () => {
-    it('deletes an existing trainer', async () => {
+    it('deletes an existing trainer with no training records', async () => {
       prisma.trainer.findUnique.mockResolvedValue(makeTrainer());
+      prisma.training.findFirst.mockResolvedValue(null);
       prisma.trainer.delete.mockResolvedValue(makeTrainer());
 
       await service.delete(1);
 
+      expect(prisma.training.findFirst).toHaveBeenCalledWith({
+        where: { trainer_id: 1, is_deleted: false },
+      });
       expect(prisma.trainer.delete).toHaveBeenCalledWith({
         where: { trainer_id: 1 },
       });
+    });
+
+    it('throws ConflictException when trainer has associated training records', async () => {
+      prisma.trainer.findUnique.mockResolvedValue(makeTrainer());
+      prisma.training.findFirst.mockResolvedValue({
+        training_id: 1,
+        trainer_id: 1,
+        is_deleted: false,
+      });
+
+      await expect(service.delete(1)).rejects.toThrow(
+        new ConflictException(
+          'Training records reference this trainer. Delete the training records first.',
+        ),
+      );
+      expect(prisma.trainer.delete).not.toHaveBeenCalled();
     });
 
     it('throws NotFoundException for non-existent trainer', async () => {

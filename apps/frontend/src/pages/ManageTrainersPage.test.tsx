@@ -60,14 +60,14 @@ function renderPage() {
 describe('ManageTrainersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedUseCreateTrainer.mockReturnValue({ mutate: mockCreateMutate, isPending: false } as ReturnType<typeof useCreateTrainer>);
-    mockedUseDeleteTrainer.mockReturnValue({ mutate: mockDeleteMutate, isPending: false } as ReturnType<typeof useDeleteTrainer>);
-    mockedUseAllSites.mockReturnValue({ data: [{ plant_no: 'UK001', name: 'Test Site' }], isLoading: false } as ReturnType<typeof useAllSites>);
-    mockedUseSearchSites.mockReturnValue({ data: [], isLoading: false } as ReturnType<typeof useSearchSites>);
+    mockedUseCreateTrainer.mockReturnValue({ mutate: mockCreateMutate, isPending: false } as unknown as ReturnType<typeof useCreateTrainer>);
+    mockedUseDeleteTrainer.mockReturnValue({ mutate: mockDeleteMutate, isPending: false } as unknown as ReturnType<typeof useDeleteTrainer>);
+    mockedUseAllSites.mockReturnValue({ data: [{ plant_no: 'UK001', name: 'Test Site' }], isLoading: false } as unknown as ReturnType<typeof useAllSites>);
+    mockedUseSearchSites.mockReturnValue({ data: [], isLoading: false } as unknown as ReturnType<typeof useSearchSites>);
   });
 
   it('renders page title and trainer table', () => {
-    mockedUseTrainers.mockReturnValue({ data: [], isLoading: false } as ReturnType<typeof useTrainers>);
+    mockedUseTrainers.mockReturnValue({ data: [], isLoading: false } as unknown as ReturnType<typeof useTrainers>);
 
     renderPage();
 
@@ -76,7 +76,7 @@ describe('ManageTrainersPage', () => {
   });
 
   it('shows "No trainers registered." when trainer list is empty', () => {
-    mockedUseTrainers.mockReturnValue({ data: [], isLoading: false } as ReturnType<typeof useTrainers>);
+    mockedUseTrainers.mockReturnValue({ data: [], isLoading: false } as unknown as ReturnType<typeof useTrainers>);
 
     renderPage();
 
@@ -132,7 +132,7 @@ describe('ManageTrainersPage', () => {
   });
 
   it('shows add trainer form with all fields', () => {
-    mockedUseTrainers.mockReturnValue({ data: [], isLoading: false } as ReturnType<typeof useTrainers>);
+    mockedUseTrainers.mockReturnValue({ data: [], isLoading: false } as unknown as ReturnType<typeof useTrainers>);
 
     renderPage();
 

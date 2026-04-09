@@ -407,6 +407,24 @@ export function SiteTraineesPage(): React.JSX.Element {
                               <Button
                                 variant="default"
                                 size="xs"
+                                onClick={() => navigate(`/persons/${person.person_id}/training`)}
+                                data-testid={`training-history-${person.person_id}`}
+                                styles={{
+                                  root: {
+                                    backgroundColor: '#f3f2f1',
+                                    color: '#0b0c0c',
+                                    border: 'none',
+                                    boxShadow: '0 2px 0 #929191',
+                                    fontFamily: '"GDS Transport", arial, sans-serif',
+                                    fontWeight: 700,
+                                  },
+                                }}
+                              >
+                                Training
+                              </Button>
+                              <Button
+                                variant="default"
+                                size="xs"
                                 onClick={() => navigate(`/persons/${person.person_id}/edit`)}
                                 data-testid={`edit-person-${person.person_id}`}
                                 styles={{

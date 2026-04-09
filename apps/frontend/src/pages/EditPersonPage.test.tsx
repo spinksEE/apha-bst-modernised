@@ -64,9 +64,9 @@ function renderPage() {
 describe('EditPersonPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedUseUpdatePerson.mockReturnValue({ mutate: mockMutate, isPending: false } as ReturnType<typeof useUpdatePerson>);
-    mockedUseAllSites.mockReturnValue({ data: [{ plant_no: 'UK001', name: 'Test Site' }], isLoading: false } as ReturnType<typeof useAllSites>);
-    mockedUseSearchSites.mockReturnValue({ data: [], isLoading: false } as ReturnType<typeof useSearchSites>);
+    mockedUseUpdatePerson.mockReturnValue({ mutate: mockMutate, isPending: false } as unknown as ReturnType<typeof useUpdatePerson>);
+    mockedUseAllSites.mockReturnValue({ data: [{ plant_no: 'UK001', name: 'Test Site' }], isLoading: false } as unknown as ReturnType<typeof useAllSites>);
+    mockedUseSearchSites.mockReturnValue({ data: [], isLoading: false } as unknown as ReturnType<typeof useSearchSites>);
   });
 
   it('shows loading state while person data loads', () => {
@@ -78,7 +78,7 @@ describe('EditPersonPage', () => {
   });
 
   it('shows person not found alert when person is null', () => {
-    mockedUsePerson.mockReturnValue({ data: null, isLoading: false } as ReturnType<typeof usePerson>);
+    mockedUsePerson.mockReturnValue({ data: null, isLoading: false } as unknown as ReturnType<typeof usePerson>);
 
     renderPage();
 

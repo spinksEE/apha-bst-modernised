@@ -143,6 +143,19 @@ export function Layout(): React.JSX.Element {
                   Manage Trainers
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/training/add"
+                  style={{
+                    color: '#ffffff',
+                    textDecoration: 'none',
+                    fontFamily: '"GDS Transport", arial, sans-serif',
+                    fontSize: '16px',
+                  }}
+                >
+                  Record Training
+                </Link>
+              </li>
             </ul>
           </nav>
         </div>

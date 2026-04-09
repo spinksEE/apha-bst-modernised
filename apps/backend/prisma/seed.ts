@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, TrainingType, Species } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -131,7 +131,7 @@ const devPersons = [
     first_name: 'James',
     last_name: 'Wilson',
     site_id: 'AB12345678', // Greenfield Farm
-    has_training: true,
+    has_training: false,
   },
   {
     first_name: 'Sarah',
@@ -149,7 +149,7 @@ const devPersons = [
     first_name: 'Emily',
     last_name: 'Clark',
     site_id: 'AB12345678', // Greenfield Farm
-    has_training: true,
+    has_training: false,
   },
   {
     first_name: 'Michael',
@@ -161,7 +161,7 @@ const devPersons = [
     first_name: 'Laura',
     last_name: 'Bennett',
     site_id: 'CD23456789', // Northern Meats Co
-    has_training: true,
+    has_training: false,
   },
   {
     first_name: 'David',
@@ -278,8 +278,106 @@ async function main() {
     }
   }
 
+  const seededTrainerIds: number[] = [];
+  const allTrainers = await prisma.trainer.findMany({
+    orderBy: { trainer_id: 'asc' },
+  });
+  for (const trainer of devTrainers) {
+    const found = allTrainers.find(
+      (t) =>
+        t.first_name === trainer.first_name &&
+        t.last_name === trainer.last_name &&
+        t.location_id === trainer.location_id,
+    );
+    if (found) {
+      seededTrainerIds.push(found.trainer_id);
+    }
+  }
+
   const trainerCount = await prisma.trainer.count();
   console.log(`Seeded ${trainerCount} trainers`);
+
+  // --- Training seed records ---
+  // person index: 0=James Wilson, 1=Sarah Thompson, 2=Robert Davies,
+  //               3=Emily Clark, 4=Michael Hughes, 5=Laura Bennett, 6=David Patel
+  // trainer index: 0=Catherine Reed (APHA staff), 1=James Wilson (cascade)
+  const devTrainings = [
+    {
+      traineeIndex: 0, // James Wilson
+      trainerIndex: 0, // Catherine Reed (APHA staff)
+      date_trained: '2025-06-15',
+      species_trained: [Species.Cattle],
+      training_type: TrainingType.Trained,
+    },
+    {
+      traineeIndex: 0, // James Wilson
+      trainerIndex: 0, // Catherine Reed (APHA staff)
+      date_trained: '2025-09-20',
+      species_trained: [Species.Goat, Species.Sheep],
+      training_type: TrainingType.CascadeTrained,
+    },
+    {
+      traineeIndex: 3, // Emily Clark
+      trainerIndex: 0, // Catherine Reed (APHA staff)
+      date_trained: '2025-11-10',
+      species_trained: [Species.Cattle],
+      training_type: TrainingType.TrainingConfirmed,
+    },
+    {
+      traineeIndex: 5, // Laura Bennett
+      trainerIndex: 0, // Catherine Reed (APHA staff)
+      date_trained: '2026-01-08',
+      species_trained: [Species.Sheep],
+      training_type: TrainingType.Trained,
+    },
+  ];
+
+  console.log(`Seeding ${devTrainings.length} dev training records...`);
+
+  for (const training of devTrainings) {
+    const traineeId = seededPersonIds[training.traineeIndex];
+    const trainerId = seededTrainerIds[training.trainerIndex];
+    const sortedSpecies = [...training.species_trained].sort();
+
+    const existing = await prisma.training.findFirst({
+      where: {
+        trainee_id: traineeId,
+        trainer_id: trainerId,
+        training_type: training.training_type,
+        date_trained: new Date(training.date_trained),
+        is_deleted: false,
+      },
+    });
+
+    if (!existing) {
+      await prisma.training.create({
+        data: {
+          trainee_id: traineeId,
+          trainer_id: trainerId,
+          date_trained: new Date(training.date_trained),
+          species_trained: sortedSpecies,
+          training_type: training.training_type,
+        },
+      });
+    }
+  }
+
+  const trainingCount = await prisma.training.count();
+  console.log(`Seeded ${trainingCount} training records`);
+
+  // Recompute has_training for ALL persons based on actual training records
+  console.log('Recomputing has_training flags...');
+  const allPersons = await prisma.person.findMany({ select: { person_id: true } });
+  for (const person of allPersons) {
+    const hasTraining = await prisma.training.findFirst({
+      where: { trainee_id: person.person_id, is_deleted: false },
+    });
+    await prisma.person.update({
+      where: { person_id: person.person_id },
+      data: { has_training: hasTraining !== null },
+    });
+  }
+  console.log('has_training flags recomputed');
 
   console.log('Seeding complete');
 }
